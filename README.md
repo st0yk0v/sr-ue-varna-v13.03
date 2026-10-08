@@ -4,8 +4,6 @@
   <img src="assets/science-logo.png" alt="Научноизследователска дейност" height="100" align="middle"/>
   &nbsp;&nbsp;&nbsp;
   <img src="assets/uev-social-logo.png" alt="Икономически университет – Варна" height="100" align="middle"/>
-  &nbsp;&nbsp;&nbsp;
-  <img src="assets/yonkoai-logo-transparent.svg" alt="YONKO-AI SMLLC." height="100" align="middle"/>
 </p>
 
 # UEV-ERP v13.03
