@@ -49,10 +49,10 @@ Google Apps Script web-app  ◄──► Google Sheets + Drive  (authoritative s
 
 ---
 
-## Структура на репозитория (действителна, v3.39)
+## Структура
 
 ```
-uev v 3.39x1/
+root/
 ├── package.json              # Node dev-tooling (dev server, lint, pack-deploy)
 ├── .gitignore                # изключва .env, node_modules, deploy артефакти
 ├── scripts/                  # dev/CI помощни скриптове (Node + PHP)
