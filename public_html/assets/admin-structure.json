@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "source": "https://ue-varna.bg/bg/p/7743/za-nas/fakulteti-i-katedri",
+    "sourceName": "Икономически университет – Варна — Факултети и катедри",
+    "scrapedAt": "2026-08-12",
+    "note": "Официална административна структура (факултети, катедри, длъжности). Използва се за обогатяване на директорията на колегите и за валидация в бекенда."
+  },
+  "faculties": [
+    {
+      "id": "finansovo-schetovoden-fakultet",
+      "name": "Финансово-счетоводен факултет",
+      "pageId": 7749,
+      "departments": [
+        { "id": "schetovodna-otchetnost", "name": "Катедра \"Счетоводна отчетност\"", "pageId": 7856 },
+        { "id": "finansi", "name": "Катедра \"Финанси\"", "pageId": 7857 },
+        { "id": "obshta-ikonomicheska-teoriya", "name": "Катедра \"Обща икономическа теория\"", "pageId": 7858 },
+        { "id": "pravni-nauki", "name": "Катедра \"Правни науки\"", "pageId": 7859 }
+      ]
+    },
+    {
+      "id": "stopanski-fakultet",
+      "name": "Стопански факултет",
+      "pageId": 7750,
+      "departments": [
+        { "id": "biznes-investitsii-nedvizhimi-imoti", "name": "Катедра \"Бизнес, инвестиции, недвижими имоти\"", "pageId": 7860 },
+        { "id": "industrialen-biznes-i-logistika", "name": "Катедра \"Индустриален бизнес и логистика\"", "pageId": 7861 },
+        { "id": "ikonomika-upravlenie-targoviyata-uslugite", "name": "Катедра \"Икономика и управление на търговията и услугите\"", "pageId": 7862 },
+        { "id": "stokoznanie", "name": "Катедра \"Стокознание\"", "pageId": 7863 },
+        { "id": "agrarna-ikonomika", "name": "Катедра \"Аграрна икономика\"", "pageId": 7864 }
+      ]
+    },
+    {
+      "id": "fakultet-informatika",
+      "name": "Факултет \"Информатика\"",
+      "pageId": 7756,
+      "departments": [
+        { "id": "informatika", "name": "Катедра \"Информатика\"", "pageId": 7799 },
+        { "id": "statistika-prilozhna-matematika", "name": "Катедра \"Статистика и приложна математика\"", "pageId": 7865 },
+        { "id": "ezikovo-obuchenie-sport", "name": "Катедра \"Езиково обучение и спорт\"", "pageId": 7871 }
+      ]
+    },
+    {
+      "id": "fakultet-upravlenie",
+      "name": "Факултет \"Управление\"",
+      "pageId": 7758,
+      "departments": [
+        { "id": "marketing", "name": "Катедра \"Маркетинг\"", "pageId": 7765 },
+        { "id": "ikonomika-organizatsia-turizma", "name": "Катедра \"Икономика и организация на туризма\"", "pageId": 7868 },
+        { "id": "upravlenie-administratsia", "name": "Катедра \"Управление и администрация\"", "pageId": 7782 },
+        { "id": "mezhdunarodni-ikonomicheski-otnosheniya", "name": "Катедра \"Международни икономически отношения\"", "pageId": 7869 }
+      ]
+    },
+    {
+      "id": "kolezh-po-turizam",
+      "name": "Колеж по туризъм",
+      "pageId": 7761,
+      "type": "college",
+      "departments": [
+        { "id": "chuzhdi-ezitsi", "name": "Катедра \"Чужди езици\"", "pageId": 8526 },
+        { "id": "turizam", "name": "Катедра \"Туризъм\"", "pageId": 8527 }
+      ]
+    }
+  ],
+  "positions": {
+    "academic": [
+      { "id": "profesor", "name": "Професор", "short": "проф. д-р" },
+      { "id": "docent", "name": "Доцент", "short": "доц. д-р" },
+      { "id": "glaven-asistent", "name": "Главен асистент", "short": "гл. ас." },
+      { "id": "asistent", "name": "Асистент", "short": "ас." },
+      { "id": "starshi-prepodavatel", "name": "Старши преподавател", "short": "ст. преп." },
+      { "id": "prepodavatel", "name": "Преподавател", "short": "преп." }
+    ],
+    "administrative": [
+      { "id": "rektor", "name": "Ректор" },
+      { "id": "zam-rektor", "name": "Заместник-ректор" },
+      { "id": "dekan", "name": "Декан" },
+      { "id": "zam-dekan", "name": "Заместник-декан" },
+      { "id": "razhkovoditel-katedra", "name": "Ръководител катедра" },
+      { "id": "sekretar", "name": "Секретар" },
+      { "id": "sluzhitel", "name": "Служител" }
+    ]
+  }
+}

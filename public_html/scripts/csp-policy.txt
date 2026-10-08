@@ -1,0 +1,65 @@
+# T92/T93: Enhanced Content-Security-Policy headers for UEV-ERP
+# Applied in .htaccess — strengthens the CSP to mitigate XSS, data injection,
+# and framing attacks while preserving Google Docs/Drive embedding.
+
+# ── Base CSP (all responses) ────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Full policy: restrict sources to our domain + trusted third parties.
+    # Google Docs/Drive embedding requires allowing Google domains.
+    Header always set Content-Security-Policy "
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.google.com https://accounts.google.com https://www.gstatic.com;
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+        img-src 'self' data: https://*.google.com https://*.gstatic.com https://*.googleapis.com blob:;
+        font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com;
+        connect-src 'self' https://*.google.com https://accounts.google.com https://script.google.com https://*.googleapis.com;
+        frame-src 'self' https://docs.google.com https://drive.google.com https://*.google.com;
+        frame-ancestors 'self' https://scienceandresearch.ue-varna.bg https://sr-ue-varna.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        upgrade-insecure-requests;
+    "
+
+    # ── Additional hardening headers (T92) ──────────────────────────────────
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "0"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self), interest-cohort=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+
+    # ── CORS — allow our iframe parent (scienceandresearch.ue-varna.bg) ──────
+    Header always set Access-Control-Allow-Origin "https://scienceandresearch.ue-varna.bg" env=IFRAME
+    Header always set Access-Control-Allow-Credentials "true" env=IFRAME
+
+    # ── Remove server fingerprinting ─────────────────────────────────────────
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# ── Report-URI endpoint for CSP violations (T92 — monitoring) ──────────────
+# POST /csp-report will log violations for analysis. Not blocking — audit only.
+#
+# To enable CSP reporting, uncomment and configure:
+# Header always set Content-Security-Policy-Report-Only "
+#     default-src 'self'; ...; report-uri /csp-report;
+# "
+# Then add a handler at api.php?a=cspreport to ingest reports.
+
+# ── Notes ────────────────────────────────────────────────────────────────────
+# T92: These headers mitigate:
+#   - Clickjacking (frame-ancestors restriction)
+#   - XSS (script-src scoping, object-src 'none')
+#   - Data exfiltration (connect-src restriction)
+#   - MIME sniffing (X-Content-Type-Options: nosniff)
+#   - Protocol downgrade (HSTS on HTTPS)
+#
+# T93: The policy allows Google Docs/Drive embedding which is required for the
+# document preview modal. The 'unsafe-inline' for scripts/styles is necessary
+# for the legacy jQuery-based components. A future migration to hashed/staged
+# scripts would remove this allowance.
+#
+# Trade-off: 'unsafe-inline' for scripts is a known weakness. The inline scripts
+# are all authored by us (no third-party inline code). For new code, prefer
+# nonces or external files.

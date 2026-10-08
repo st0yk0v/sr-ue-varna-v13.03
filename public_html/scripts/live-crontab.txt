@@ -1,0 +1,23 @@
+# UEV-ERP Hostinger crontab — sr-ue-varna.com
+# ============================================================
+# Install with: crontab -e  (paste all lines below)
+# Or: crontab crontab.txt
+#
+# Logs go to ~/logs/ — create that dir first:
+#   mkdir -p /home/u129919172/logs
+#
+# Paths:
+#   WEB = /home/u129919172/domains/sr-ue-varna.com/public_html/database
+# LOG = /home/u129919172/logs
+
+# 1. Sync Worker — process GAS queue every minute
+* * * * * php /home/u129919172/domains/sr-ue-varna.com/public_html/database/sync_worker.php >> /home/u129919172/logs/sync_worker.log 2>&1
+
+# 2. VEDA Sync — sync stale ORCID profiles every 5 minutes
+*/5 * * * * php /home/u129919172/domains/sr-ue-varna.com/public_html/database/veda_sync_worker.php >> /home/u129919172/logs/veda_sync.log 2>&1
+
+# 3. Cron Scheduler — run due scheduled_tasks every minute
+* * * * * php /home/u129919172/domains/sr-ue-varna.com/public_html/database/cron_scheduler.php >> /home/u129919172/logs/cron_scheduler.log 2>&1
+
+# 4. Log rotation — keep logs from growing unbounded (weekly)
+0 0 * * 0 find /home/u129919172/logs/ -name '*.log' -size +5M -exec sh -c 'cat > "$1" <<< "--- rotated $(date) ---"' _ {} \;

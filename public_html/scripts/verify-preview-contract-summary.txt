@@ -1,0 +1,28 @@
+Prop-contract guard summary for Google iframe document handler fixes (12.51.15–18)
+================================================================================
+
+Gates (3 positive assertions, WARN-only — never blocks push):
+
+1. driveGone   — `_dpDriveInlineEmbed` is gated on `!driveGone`
+   in js/components.js. Confirms the deleted-file guard wraps the Google embed
+   (12.51.9 fix intact).
+   Status: OK
+
+2. edit-mode   — `setEditMode(true)` appears inside the `handleToggleEdit` body
+   in js/components.js. Confirms the Редактирай/Преглед toggle actually flips
+   into edit mode (12.51.15 fix intact).
+   Status: OK
+
+3. native-ctl  — `_dpGnBase` appears in js/components.js AND `.gnative-group`
+   appears in css/uev.css. Confirms the Google-native control group is wired
+   (12.51.16 fix intact).
+   Status: OK
+
+Version trajectory (all six locations unified to 12.51.20):
+- version.json / __ERP_BUILD / sw.js BUILD / config.php APP_VERSION / 59 ?v= tokens
+
+Supporting references:
+- scripts/verify-preview-contract.cjs — three gate assertions on source-code patterns
+- scripts/verify-preview-contract-summary.txt — this file, gate summary for the pre-commit hook
+- css/uev.css — .doc-viewer-overlay .doc-viewer-seg-btn.active light-mode active-state rule (v12.51.18)
+- scripts/run-tests.sh — WARN-only gate appended after the G6 guard call

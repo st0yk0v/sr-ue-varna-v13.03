@@ -1,0 +1,36 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ api.php?action=$1 [QSA,L]
+    RewriteRule ^api$ api.php [QSA,L]
+</IfModule>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # v12.30.0-perf: unsafe-none allows postMessage from OAuth popups and cross-origin
+    # iframe embedding. same-origin-allow-popups blocked Client.postMessage in the
+    # service worker and prevented Google Identity Services OAuth popup callbacks.
+    Header always set Cross-Origin-Opener-Policy "unsafe-none"
+    Header always set Cross-Origin-Embedder-Policy "unsafe-none"
+    # X-Frame-Options NOT set — `SAMEORIGIN` would block cross-origin iframe embedding
+    # on scienceandresearch.ue-varna.bg. CSP frame-ancestors (set in root .htaccess)
+    # is the modern standard for controlling embedding.
+</IfModule>
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css               "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png              "access plus 1 year"
+    ExpiresByType image/jpeg             "access plus 1 year"
+</IfModule>
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript
+</IfModule>
+<FilesMatch "\.(env|sql|md|log|gitignore)$">
+    Require all denied
+</FilesMatch>
+DirectoryIndex index.html index.php

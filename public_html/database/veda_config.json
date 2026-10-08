@@ -1,0 +1,10 @@
+{
+    "scopusApiKey": "",
+    "orcidClientId": "APP-BXDNA6YVRIIXHCJC",
+    "orcidClientSecret": "67b48e19-ed12-4d08-8812-e2357fb24c15",
+    "orcidSandbox": false,
+    "orcidRedirectUri": "https://sr-ue-varna.com/database/orcid_login_callback.php",
+    "orcidToken": "",
+    "llmEndpoint": "",
+    "llmKey": ""
+}

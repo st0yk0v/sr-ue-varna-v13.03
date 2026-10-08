@@ -1,0 +1,39 @@
+{
+  "total_suspects": 5,
+  "suspects": [
+    {
+      "line": 8485,
+      "identifier": "_ensureDraftExists",
+      "reason": "const/let '_ensureDraftExists' referenced at line 8485 before declaration at line 9421 but only inside a deferred callback/closure [const _ensureDraftExists] -> NOT a crash",
+      "is_crash": false
+    },
+    {
+      "line": 9527,
+      "identifier": "_step2AutoGenTypeRef",
+      "reason": "const/let '_step2AutoGenTypeRef' referenced at line 9527 before declaration at line 10671 but only inside a deferred callback/closure [const _step2AutoGenTypeRef] -> NOT a crash",
+      "is_crash": false
+    },
+    {
+      "line": 10295,
+      "identifier": "validateStep1",
+      "reason": "const/let 'validateStep1' referenced at line 10295 before declaration at line 10303 but only inside a deferred callback/closure [const validateStep1] -> NOT a crash",
+      "is_crash": false
+    },
+    {
+      "line": 10295,
+      "identifier": "validateStep2",
+      "reason": "const/let 'validateStep2' referenced at line 10295 before declaration at line 10305 but only inside a deferred callback/closure [const validateStep2] -> NOT a crash",
+      "is_crash": false
+    },
+    {
+      "line": 13147,
+      "identifier": "_hasUserEditedRef",
+      "reason": "const/let '_hasUserEditedRef' referenced at line 13147 before declaration at line 13353 but only inside a deferred callback/closure [const _hasUserEditedRef] -> NOT a crash",
+      "is_crash": false
+    }
+  ],
+  "files_scanned": [
+    "C:/Users/stoyk/OneDrive/Desktop/uev ver 7.21/js/components.js"
+  ],
+  "verification": "Two-layer read-only AST audit of C:/Users/stoyk/OneDrive/Desktop/uev ver 7.21/js/components.js (18090 lines) via @babel/parser + @babel/traverse. Layer 1: every function scope + the module/Program scope was scanned for synchronous (render/module-eval) references to a 'let'/'const' binding that occur BEFORE its declaration line; deferred references (inside useEffect/useCallback/event-handler closures, non-IIFE nested functions) were classified as false positives; IIFEs treated as synchronous. Layer 2 (independent cross-check): scanned all useState/useRef/useMemo/useCallback/useEffect calls for a bare-identifier synchronous argument that is a later-declared const/let -> 0 hits. Result: 0 true TDZ crashes in any component other than DocumentPreviewModal. DocumentPreviewModal (lines 1495-3085) was EXCLUDED per scope (parent owns it); note it also contains no remaining synchronous forward refs. The 5 reported suspects are forward-references that are provably deferred (inside useEffect/useCallback bodies or module-level arrow handlers invoked only on user action), therefore NOT crashes."
+}

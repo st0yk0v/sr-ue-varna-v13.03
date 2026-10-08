@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, minimum-scale=1">
+    <meta name="theme-color" content="#233874">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Система за управление на научноизследователската дейност на Икономически университет – Варна. Конкурси, проектни предложения, рецензиране и договори.">
+    <title>ИУ – Варна · Научноизследователска дейност</title>
+
+    <!-- Preconnect: warm DNS+TCP+TLS to CDN origins -->
+    <link rel="preconnect" href="https://sr-ue-varna.com" crossorigin>
+    <link rel="preconnect" href="https://accounts.google.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
+    <link rel="dns-prefetch" href="https://sr-ue-varna.com">
+
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="csrf-token" content="">
+    <meta name="app-version" content="13.0.2">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/uev.css">
+    <link rel="stylesheet" href="/css/uev-responsive.css">
+
+    <base target="_top">
+    <script>(function(){try{var inFrame=(window.self!==window.top)||(window.frameElement!=null)||/[?&]embed=1\b/.test(location.search);if(inFrame){document.documentElement.classList.add('in-iframe');window.addEventListener('message',function(e){if(e.data&&e.data.type==='erp:resize'){document.documentElement.style.height=e.data.height+'px';}});if(window.parent!==window.self){var h=Math.max(document.body.scrollHeight,document.body.offsetHeight);window.parent.postMessage({type:'erp:resize',height:h},'*');var _ro=new ResizeObserver(function(){var hh=Math.max(document.body.scrollHeight,document.body.offsetHeight);window.parent.postMessage({type:'erp:resize',height:hh},'*');});_ro.observe(document.body);}}}catch(err){}})();</script>
+</head>
+<body>
+    <div style="display:none" id="social-oidc-state"></div>
+    <script>
+    // ── social.html — OIDC/callback landing page ──
+    // Google OAuth returns users here after consent. Forward them to the
+    // main SPA at /index.html which handles the auth.google.callback route.
+    // If ?code= or ?state= is present, stash it so the SPA can pick it up
+    // from sessionStorage before the redirect drops the query string.
+    (function () {
+        var qs = {};
+        var q = location.search.substring(1);
+        if (q) {
+            var pairs = q.split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var kv = pairs[i].split('=');
+                if (kv.length === 2) qs[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+            }
+        }
+        var hasAuthParams = !!(qs.code || qs.state || qs.error || qs.pkce_challenge);
+        try {
+            if (hasAuthParams) {
+                // Stash OAuth params so the SPA can read them from sessionStorage
+                sessionStorage.setItem('oidc_callback_params', JSON.stringify(qs));
+                sessionStorage.setItem('oidc_callback_ts', String(Date.now()));
+            }
+        } catch (_) { /* sessionStorage may be blocked in some iframe contexts */ }
+
+        // Redirect to the main app.  If OAuth params were stashed, the SPA
+        // will detect them and handle the callback; otherwise a plain landing.
+        var target = '/';
+        if (hasAuthParams) {
+            // Tell the SPA to process the callback by adding a flag
+            target = '/?oidc_callback=1';
+        }
+        // Use replaceState so the back button doesn't bounce the user back here
+        try {
+            if (history.replaceState) {
+                history.replaceState(null, '', target);
+            } else {
+                location.href = target;
+            }
+        } catch (_) {
+            location.href = target;
+        }
+    })();
+    </script>
+    <noscript>
+        <meta http-equiv="refresh" content="0;url=/">
+        <div style="padding:2rem;font-family:system-ui,sans-serif;color:#333;max-width:480px;margin:8vh auto;text-align:center">
+            <p>За да продължите, разрешете JavaScript или използвайте <a href="/">основната страница</a>.</p>
+        </div>
+    </noscript>
+</body>
+</html>

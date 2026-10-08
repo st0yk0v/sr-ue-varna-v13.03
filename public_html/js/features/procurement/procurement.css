@@ -1,0 +1,803 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * procurement.css — Стилове за Проектно управление на обществени поръчки
+ * Пазарджишка община · 5 спортни площадки
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Layout ── */
+.pd-dashboard {
+  padding: 1.25rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pd-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.pd-page-subtitle {
+  font-size: 0.875rem;
+  color: var(--ink-4);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Summary Cards ── */
+.pd-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-summary-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pd-summary-card-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-4);
+  font-weight: 600;
+}
+
+.pd-summary-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pd-summary-card-label-sub {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+}
+
+/* ── Status colors ── */
+.pd-status-not_started { color: var(--ink-4); }
+.pd-status-in_progress { color: var(--primary); }
+.pd-status-completed { color: var(--ok); }
+.pd-status-overdue { color: var(--err); }
+
+.pd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pd-badge-not_started { background: var(--bg-2); color: var(--ink-4); }
+.pd-badge-in_progress { background: #dbeafe; color: var(--primary); }
+.pd-badge-completed { background: #d1fae5; color: var(--ok); }
+.pd-badge-overdue { background: #fee2e2; color: var(--err); }
+
+/* ── Position List ── */
+.pd-position-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-position-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.pd-position-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.pd-position-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pd-position-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pd-position-card-meta {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+}
+
+.pd-position-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Quick Links ── */
+.pd-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-quick-link {
+  padding: 0.5rem 1rem;
+  background: var(--bg-2);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--primary);
+  cursor: pointer;
+  border: 1px solid var(--border-soft);
+  transition: all 0.15s ease;
+}
+
+.pd-quick-link:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* ── Tabs ── */
+.pd-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+}
+
+.pd-tab {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-4);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.pd-tab:hover {
+  color: var(--primary);
+}
+
+.pd-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* ── Tab Panels ── */
+.pd-tab-panel {
+  display: none;
+}
+.pd-tab-panel.active {
+  display: block;
+}
+
+/* ── Document Checklist ── */
+.pd-doc-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pd-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+
+.pd-doc-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.pd-doc-check.checked {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.pd-doc-info {
+  flex: 1;
+}
+
+.pd-doc-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.pd-doc-part {
+  font-size: 0.7rem;
+  color: var(--ink-4);
+}
+
+.pd-doc-status {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* ── Compliance ── */
+.pd-compliance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pd-compliance-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+}
+
+.pd-compliance-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.pd-compliance-icon.compliant { background: #d1fae5; color: var(--ok); }
+.pd-compliance-icon.pending { background: #fef3c7; color: var(--gold); }
+.pd-compliance-icon.violation { background: #fee2e2; color: var(--err); }
+
+.pd-compliance-info {
+  flex: 1;
+}
+
+.pd-compliance-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pd-compliance-desc {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+}
+
+.pd-compliance-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Buttons ── */
+.pd-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.pd-btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.pd-btn-primary:hover { opacity: 0.9; }
+
+.pd-btn-secondary {
+  background: var(--bg-2);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+.pd-btn-secondary:hover { background: var(--border-soft); }
+
+.pd-btn-danger {
+  background: var(--err);
+  color: #fff;
+}
+.pd-btn-danger:hover { opacity: 0.9; }
+
+.pd-btn-sm {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.7rem;
+}
+
+/* ── Penalty Display ── */
+.pd-penalty-box {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 1.25rem;
+}
+
+.pd-penalty-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+}
+
+.pd-penalty-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.8rem;
+}
+
+.pd-penalty-row:last-child { border-bottom: none; }
+.pd-penalty-amount {
+  font-weight: 700;
+  color: var(--err);
+}
+
+/* ── Contract Info ── */
+.pd-contract-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 1rem;
+}
+
+.pd-contract-field {
+  margin-bottom: 0.5rem;
+}
+
+.pd-contract-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-4);
+  font-weight: 600;
+}
+
+.pd-contract-value {
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+/* ── Payment Tracker ── */
+.pd-payment-tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pd-payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+
+.pd-payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pd-payment-period {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pd-payment-detail {
+  font-size: 0.7rem;
+  color: var(--ink-4);
+}
+
+/* ── Supervision Log ── */
+.pd-supervision-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pd-supervision-entry {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+
+.pd-supervision-date {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+  min-width: 80px;
+}
+
+.pd-supervision-text {
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+/* ── Progress Bar ── */
+.pd-progress-bar {
+  height: 6px;
+  background: var(--border-soft);
+  border-radius: 3px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.pd-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.pd-progress-fill.not_started { background: var(--ink-4); }
+.pd-progress-fill.in_progress { background: var(--primary); }
+.pd-progress-fill.completed { background: var(--ok); }
+.pd-progress-fill.overdue { background: var(--err); }
+
+/* ── Alert/Warning ── */
+.pd-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pd-alert-warning {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn);
+}
+
+.pd-alert-danger {
+  background: var(--err-bg);
+  border: 1px solid var(--err-border);
+  color: var(--err);
+}
+
+.pd-alert-info {
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  color: var(--primary);
+}
+
+/* ── Notes Field ── */
+.pd-notes-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  resize: vertical;
+  min-height: 60px;
+}
+
+.pd-notes-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ── Grid layouts ── */
+.pd-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pd-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Info card ── */
+.pd-info-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-soft);
+}
+
+.pd-info-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.pd-info-card-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── Schedule ── */
+.pd-schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 0.5rem;
+}
+
+.pd-schedule-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  min-width: 100px;
+}
+
+.pd-schedule-task {
+  font-size: 0.8rem;
+  color: var(--ink);
+  flex: 1;
+}
+
+.pd-schedule-status {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* ── Filter bar ── */
+.pd-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.pd-filter-select {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ── Modal overlay ── */
+.pd-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000;
+}
+
+.pd-modal {
+  background: var(--card);
+  border-radius: 12px;
+  width: 95vw; max-width: 700px; max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.pd-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.pd-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pd-modal-close {
+  background: none; border: none; font-size: 1.25rem;
+  cursor: pointer; color: var(--ink-4); padding: 0.25rem;
+}
+
+/* ── Empty state ── */
+.pd-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ink-4);
+  font-size: 0.85rem;
+}
+
+.pd-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .pd-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pd-grid-2, .pd-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .pd-position-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .pd-position-card-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .pd-summary-grid {
+    grid-template-columns: 1fr;
+  }
+  .pd-dashboard {
+    padding: 0.75rem;
+  }
+}
+
+/* ── Compliance progress ── */
+.pd-compliance-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pd-compliance-percent {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ok);
+}
+
+/* ── Insurance tracker ── */
+.pd-insurance-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 0.5rem;
+}
+
+.pd-insurance-status {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.pd-insurance-status.valid { background: #d1fae5; color: var(--ok); }
+.pd-insurance-status.expired { background: #fee2e2; color: var(--err); }
+.pd-insurance-status.expiring { background: #fef3c7; color: var(--gold); }
+
+/* ── Penalty calculator ── */
+.pd-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pd-calc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pd-calc-label {
+  font-size: 0.75rem;
+  color: var(--ink-4);
+  font-weight: 600;
+}
+
+.pd-calc-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ── Section headers ── */
+.pd-section-header {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Deadline indicator ── */
+.pd-deadline {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pd-deadline-soon { background: #fef3c7; color: var(--gold); }
+.pd-deadline-overdue { background: #fee2e2; color: var(--err); }
+.pd-deadline-ok { background: #d1fae5; color: var(--ok); }
+
+/* ── Budget display ── */
+.pd-budget {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pd-budget-used {
+  font-size: 0.8rem;
+  color: var(--ink-4);
+}
+
+.pd-budget-bar {
+  height: 8px;
+  background: var(--border-soft);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.pd-budget-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}

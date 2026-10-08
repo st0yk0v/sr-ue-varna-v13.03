@@ -1,0 +1,124 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  styles-responsive.css — Responsive & touch enhancement layer  (v3.39)
+ *
+ *  Loaded AFTER styles.css so it augments (never rewrites) the base sheet.
+ *  Goals:
+ *    1. Standardised breakpoint tokens (documented, consistent).
+ *    2. Touch-device adaptations — the base sheet had 0 `pointer:coarse`
+ *       queries, so hover-only affordances and small tap targets are fixed here.
+ *    3. Fluid safeguards for very small / very large / landscape screens.
+ *
+ *  Everything here is additive and low-specificity; it defers to explicit
+ *  component rules in styles.css unless a touch/viewport concern requires it.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Breakpoint reference (for maintainers) ──────────────────────────────────
+ *   --bp-xs : 380px   phones (small)
+ *   --bp-sm : 480px   phones
+ *   --bp-md : 768px   tablets (portrait)
+ *   --bp-lg : 1024px  tablets (landscape) / small laptops
+ *   --bp-xl : 1280px  desktops
+ *   Prefer these values for NEW media queries to reduce breakpoint drift.
+ * ------------------------------------------------------------------------- */
+:root {
+  --bp-xs: 380px;
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  /* Minimum accessible tap target (WCAG 2.5.5 / Apple HIG) */
+  --tap-min: 44px;
+}
+
+/* ═══ 1. TOUCH DEVICES ═══════════════════════════════════════════════════════
+ *  Applies to phones/tablets and any coarse pointer without real hover.
+ *  Ensures interactive elements are reachable by finger and don't rely on
+ *  hover to reveal state. */
+@media (hover: none) and (pointer: coarse) {
+
+  /* Enlarge primary interactive controls to the accessible minimum. */
+  button:not(.conn-banner-dismiss),
+  .btn,
+  .nav-tab,
+  a.button,
+  input[type="button"],
+  input[type="submit"],
+  .stat-btn,
+  .doc-picker-search,
+  select {
+    min-height: var(--tap-min);
+  }
+
+  /* Icon-only / close buttons: give them a real hit area even if visually small. */
+  .modal-close,
+  .icon-btn,
+  .conn-banner-dismiss,
+  [role="button"] {
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+  }
+
+  /* Hover-driven decorative reveals should be visible by default on touch,
+   * since there is no hover to trigger them. Keeps affordances discoverable. */
+  .stat-btn[data-clickable]::after,
+  .assign-app-card::after,
+  .reviewer-pool-item::after {
+    opacity: .55;
+  }
+
+  /* Remove sticky :hover "stuck" states that linger after a tap on touch. */
+  .nav-tab:hover::before { opacity: 0; }
+
+  /* Comfortable spacing for tappable list rows. */
+  .multi-select-drop [role="option"] { padding-top: .5rem; padding-bottom: .5rem; }
+}
+
+/* ═══ 2. WIDE TABLES → HORIZONTAL SCROLL ═════════════════════════════════════
+ *  On narrow screens, let data tables scroll horizontally with momentum
+ *  instead of breaking layout. Wrap tables in .table-scroll where possible;
+ *  this also catches bare tables as a safety net. */
+@media (max-width: 768px) {
+  .table-scroll,
+  .data-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .table-scroll > table { min-width: 640px; }
+}
+
+/* ═══ 3. VERY SMALL SCREENS (≤380px) ═════════════════════════════════════════
+ *  Tighten paddings and stack dense grids so nothing overflows. */
+@media (max-width: 380px) {
+  .form-grid,
+  .budget-grid,
+  .stat-grid { grid-template-columns: 1fr !important; }
+
+  .modal-box { padding-left: .75rem; padding-right: .75rem; }
+
+  /* Prevent iOS auto-zoom on focus by keeping inputs ≥16px. */
+  input, select, textarea { font-size: max(16px, 1rem); }
+}
+
+/* ═══ 4. LANDSCAPE PHONES ════════════════════════════════════════════════════
+ *  Short viewports: cap modal height and let the body scroll internally so the
+ *  action buttons stay reachable. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .modal-box { max-height: 92dvh; overflow-y: auto; }
+  .modal-overlay { align-items: flex-start; }
+}
+
+/* ═══ 5. LARGE DESKTOPS (≥1280px) ════════════════════════════════════════════
+ *  Prevent ultra-wide line lengths in text-heavy panels for readability. */
+@media (min-width: 1280px) {
+  .prose,
+  .form-help,
+  .review-comment { max-width: 78ch; }
+}
+
+/* ═══ 6. REDUCED MOTION (belt-and-suspenders) ════════════════════════════════
+ *  styles.css already honours prefers-reduced-motion for its animations; this
+ *  guards any transitions introduced by this layer. */
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}

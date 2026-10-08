@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,minimum-scale=1">
+
+<meta name="color-scheme" content="light">
+
+<meta name="theme-color" content="#233874">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="/assets/uev-logo.jpg">
+<meta name="apple-mobile-web-app-title" content="ИУ-Варна НИД">
+<meta name="description" content="Система за управление на научноизследователската дейност на Икономически университет – Варна. Конкурси, проектни предложения, рецензиране и договори.">
+
+<title>ИУ – Варна · Научноизследователска дейност</title>
+
+
+
+<!-- Preconnect: warm DNS+TCP+TLS to CDN origins so first fetch avoids 3 round-trips -->
+
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+
+<link rel="preconnect" href="https://sr-ue-varna.com" crossorigin>
+
+<!-- DNS-prefetch for analytics and auth origins that aren't on the critical path -->
+
+<link rel="dns-prefetch" href="https://accounts.google.com">
+
+<link rel="dns-prefetch" href="https://formspree.io">
+
+<link rel="dns-prefetch" href="https://www.googleapis.com">
+
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+<link rel="dns-prefetch" href="https://sr-ue-varna.com">
+
+<link rel="dns-prefetch" href="https://srv1701.hstgr.io">
+
+
+
+<!-- Iframe-friendliness:
+
+     1. <base target="_top"> → every <a href=…> opens in the parent window so
+
+        the embedded UI doesn't trap navigation inside the iframe.
+
+     2. The early script below adds class="in-iframe" to <html> when the
+
+        page is being framed, so styles.css can switch to fluid heights
+
+        (100% instead of 100dvh) and hide elements that would overflow. -->
+
+<base target="_top">
+
+<script>(function(){try{var inFrame=(window.self!==window.top)||(window.frameElement!=null)||/[?&]embed=1\b/.test(location.search);if(inFrame){document.documentElement.classList.add('in-iframe');
+
+  /* ── iframe auto-resize bridge ────────────────────────────────────
+
+     Posts {type:'erp:resize',height} to the embedding parent whenever
+
+     the document height changes. Embedding pages can listen with:
+
+       window.addEventListener('message',e=>{ if(e.data&&e.data.type==='erp:resize') iframe.style.height=e.data.height+'px' })
+
+     ResizeObserver + MutationObserver driven, rAF-throttled, postMessage
+
+     debounced at 60ms to coalesce bursty DOM mutations into single updates.
+
+     When a modal is open we FREEZE the reported height to parent viewport
+
+     size — overlays stretch to 100svh and would otherwise pump the iframe
+
+     up & down on every open/close, producing a visible flash. */
+
+  var lastH=0,rafId=0,frozenH=0,parentVH=0,_lastPostTs=0,_ovCacheTs=0,_ovCached=false,_vchTs=0;
+
+  // ── Safe postMessage wrapper (v12.30.0-perf) ─────────────────────────
+
+  // Chrome logs "Cross-Origin-Opener-Policy policy would block the
+
+  // window.postMessage call" even when the call is wrapped in try-catch.
+
+  // This wrapper:
+
+  //   1. Uses PARENT_ORIGIN (known embedding domain) when available instead
+
+  //      of '*' to satisfy COOP requirements and suppress the console warning.
+
+  //   2. Falls back to '*' when the page is running standalone (no parent).
+
+  //   3. Silently catches any remaining exceptions (cross-origin blocked).
+
+  //   4. Checks COOP compatibility before calling via a Feature Detection probe.
+
+  // PARENT_ORIGIN is set in window.ERP_CONFIG.PARENT_ORIGIN later (config block).
+
+  // Until then, check both locations. If neither is available yet, default to '*'
+
+  // and the first successful _safePostMessage_ will re-resolve once config loads.
+
+  var _postTargetOrigin_ = (typeof window.ERP_CONFIG !== 'undefined' && window.ERP_CONFIG.PARENT_ORIGIN)
+
+    ? window.ERP_CONFIG.PARENT_ORIGIN : '*';
+
+  // Lazy re-resolve: once ERP_CONFIG loads with PARENT_ORIGIN, upgrade the target.
+
+  function _refreshPostTargetOrigin_() {
+
+    var _po = (typeof window.ERP_CONFIG !== 'undefined' && window.ERP_CONFIG.PARENT_ORIGIN) || '';
+
+    if (_po && _po !== _postTargetOrigin_) { _postTargetOrigin_ = _po; return true; }
+
+    return false;
+
+  }
+
+  var _coopProbeDone_ = false;
+
+  var _coopProbeResult_ = true;
+
+  function _probeCoop_() {
+
+    if (_coopProbeDone_) return _coopProbeResult_;
+
+    _coopProbeDone_ = true;
+
+    try {
+
+      // Attempt a no-op postMessage to self — if COOP blocks it, Chrome
+
+      // will log the warning. We detect this by checking if the message
+
+      // bounces back within 50ms. If not, COOP is restrictive and we
+
+      // suppress future postMessage calls to avoid console noise.
+
+      var _probeTimer = setTimeout(function() {
+
+        _coopProbeResult_ = false; // no reply → COOP blocked
+
+      }, 50);
+
+      var _probeHandler = function(ev) {
+
+        if (ev && ev.data && ev.data.__coopProbe) {
+
+          clearTimeout(_probeTimer);
+
+          window.removeEventListener('message', _probeHandler);
+
+          _coopProbeResult_ = true;
+
+        }
+
+      };
+
+      window.addEventListener('message', _probeHandler);
+
+      window.postMessage({ __coopProbe: true }, '*');
+
+    } catch(_) {
+
+      _coopProbeResult_ = false;
+
+    }
+
+    return _coopProbeResult_;
+
+  }
+
+  function _safePostMessage_(msg, targetOrigin) {
+
+    if (!msg) return;
+
+    var to = targetOrigin || _postTargetOrigin_;
+
+    try {
+
+      // If COOP probe determined blocking, skip postMessage to avoid console noise
+
+      if (_probeCoop_()) {
+
+        parent.postMessage(msg, to);
+
+      }
+
+    } catch(_) {
+
+      // COOP blocked — silently ignore. The console warning is still logged
+
+      // by Chrome (cannot suppress), but the app continues to work because
+
+      // the parent listens for our messages and we listen for its viewport
+
+      // messages via the event listener above.
+
+    }
+
+  }
+
+  function readParentVH(){
+
+    if(Date.now()-_vchTs<5000)return; _vchTs=Date.now();
+
+    try{var n=window.parent&&window.parent.innerHeight||0;if(n>200&&n<6000)parentVH=n;}catch(_){}
+
+  }
+
+  readParentVH();
+
+  // ── Listen for viewport height from parent (v12.30.0-perf: origin-validated) ──
+
+  // Accept messages from known embedding origin AND from any origin when running
+
+  // standalone (where '*' is the only viable wildcard). The parent (science portal)
+
+  // sends erp:viewport so the iframe knows how much vertical space is visible.
+
+  try{window.addEventListener('message',function(ev){
+
+    // Origin validation: only accept from known embedding origin or self
+
+    var _origin_ = ev.origin || ev.originalEvent?.origin || '';
+
+    if (_origin_ !== _postTargetOrigin_ && _origin_ !== window.location.origin && _postTargetOrigin_ !== '*') return;
+
+    var d=ev&&ev.data;if(!d||d.type!=='erp:viewport')return;
+
+    var n=Number(d.height)||0;if(n>200&&n<6000){parentVH=n;schedule();}
+
+  });}catch(_){}
+
+  function isOverlayed(){
+
+    if(Date.now()-_ovCacheTs<100)return _ovCached;
+
+    _ovCacheTs=Date.now();
+
+    _ovCached=document.documentElement.classList.contains('modal-open')
+
+        ||!!document.querySelector('.modal-overlay,.drawer-overlay,.detail-sheet,.detail-sheet-scrim,.cookie-banner,.auth-transition-overlay.active,#loading-screen:not(.hidden)');
+
+    return _ovCached;
+
+  }
+
+  function _postResize(h){
+
+    var now=Date.now();
+
+    if(Math.abs(h-lastH)<=2)return;
+
+    if(now-_lastPostTs<60)return;
+
+    _lastPostTs=now;lastH=h;
+
+    _safePostMessage_({type:'erp:resize',height:h,build:window.__ERP_BUILD||''});
+
+  }
+
+  function send(){
+
+    rafId=0;readParentVH();
+
+    if(isOverlayed()){
+
+      var overlayH=parentVH>0?parentVH:650;
+
+      _postResize(overlayH);return;
+
+    }
+
+    var h=Math.max(document.documentElement.scrollHeight,document.body?document.body.scrollHeight:0);
+
+    if(!h)return;frozenH=h;_postResize(h);
+
+  }
+
+  function schedule(){if(!rafId)rafId=requestAnimationFrame(send)}
+
+  // ── Immediate first height (synchronous, during HTML parse) ──
+
+  // Parent gets the initial height within ~16ms of script execution, before any event.
+
+  schedule();
+
+  // ── Fire again as soon as possible after layout settles ──
+
+  if(document.readyState==='loading'){
+
+    document.addEventListener('readystatechange',function(){
+
+      if(document.readyState==='interactive')schedule();
+
+    });
+
+  }
+
+  window.addEventListener('load',schedule);
+
+  window.addEventListener('resize',schedule);
+
+  document.addEventListener('DOMContentLoaded',function(){
+
+    // Re-observe after the first render settles
+
+    try{new ResizeObserver(function(){schedule();}).observe(document.documentElement)}catch(_){};
+
+    try{
+
+      var _ovDebounce=0;
+
+      new MutationObserver(function(){
+
+        if(isOverlayed()){
+
+          if(!_ovDebounce){_ovDebounce=setTimeout(function(){_ovDebounce=0;_safePostMessage_({type:'erp:overlay-open',build:window.__ERP_BUILD||''});},200);}
+
+        }
+
+        schedule();
+
+      }).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+
+    }catch(_){}
+
+    /* ── Modal viewport tracker (perf-conscious) ──────────────────────
+
+       Re-anchors `.modal-overlay` to the slice of the iframe currently
+
+       visible inside the parent's viewport, so a modal opened deep in a
+
+       3000px-tall iframe never sits above the user's scroll position.
+
+
+
+       Performance rules:
+
+         • Lightweight class observer on <html> only fires when modal-open
+
+           toggles — no body-subtree scanning (which would re-fire on every
+
+           React render).
+
+         • Parent scroll/resize listeners are attached ONLY while a modal
+
+           is open and removed the moment it closes.
+
+         • All cross-realm reads are wrapped in try/catch; cross-origin
+
+           parents skip silently. */
+
+    try{
+
+      var fe=window.frameElement;
+
+      if(!fe||!window.parent)return;
+
+      var trackRaf=0,active=false,didAutoScroll=false;
+
+      function applyModalAnchor(){
+
+        trackRaf=0;
+
+        var modals=document.querySelectorAll('.modal-overlay,.drawer-overlay,.detail-sheet,.detail-sheet-scrim');
+
+        if(!modals.length){applyToastAnchor();return;}
+
+        var rect,pwH;
+
+        try{rect=fe.getBoundingClientRect();pwH=window.parent.innerHeight||0;}
+
+        catch(_){return;}
+
+        if(!pwH)return;
+
+        var visibleTop=Math.max(0,-rect.top);
+
+        var visibleBottom=Math.min(fe.offsetHeight,pwH-rect.top);
+
+        var visibleH=Math.max(0,visibleBottom-visibleTop);
+
+        /* Floor: never pin the overlay smaller than 360px. When the iframe is
+
+           mostly off-screen, the raw visibleH can be a few pixels (just the
+
+           footer peeking in) — anchoring the modal to that sliver makes the
+
+           head/body/footer unreachable. A 360px floor guarantees the close
+
+           button and primary actions are always tappable; if the floor pushes
+
+           the modal below the parent viewport, the parent scroll listener
+
+           re-centers on the next user scroll. */
+
+        if(visibleH>0&&visibleH<360)visibleH=Math.min(360,fe.offsetHeight);
+
+        /* On EVERY first activation, pull the iframe slice into clear view
+
+           so the modal lands directly in front of the user — not just when
+
+           the slice is critically tiny. Aim for a generous slice (≥520px or
+
+           80% of parent viewport) centered in the parent viewport. */
+
+        if(!didAutoScroll){
+
+          didAutoScroll=true;
+
+          var wantH=Math.min(fe.offsetHeight,Math.max(520,Math.round(pwH*.8)));
+
+          var targetTop=Math.max(0,fe.offsetTop-Math.max(20,Math.round((pwH-wantH)/2)));
+
+          try{window.parent.scrollTo({top:targetTop,behavior:'smooth'});}
+
+          catch(_){try{fe.scrollIntoView({block:'center',behavior:'smooth'})}catch(__){}}
+
+          setTimeout(scheduleAnchor,380);
+
+          return;
+
+        }
+
+        for(var i=0;i<modals.length;i++){
+
+          var ov=modals[i];
+
+          var isDocViewer=ov.classList.contains('doc-viewer-overlay');
+
+          var isFullscreenBox=!!ov.querySelector('.modal-box.fullscreen');
+
+          var isDetailSheet=ov.classList.contains('detail-sheet');
+
+          /* Pin EVERY overlay (including fullscreen / doc-viewer / detail-sheet)
+
+             to the visible slice of the iframe inside the parent viewport. The
+
+             iframe is sized to parentVH while any modal is open, so this is
+
+             usually a 1:1 identity — but it's the safety net during scroll,
+
+             cross-origin (parentVH unknown), and resize/rotate. */
+
+          ov.style.top=visibleTop+'px';
+
+          ov.style.height=visibleH+'px';
+
+          ov.style.minHeight='0';
+
+          /* Doc-viewer / fullscreen / detail-sheet center themselves; don't
+
+             override align-items. Other modals: center when room allows,
+
+             top-align otherwise so the head isn't clipped. */
+
+          if(!(isDocViewer||isFullscreenBox||isDetailSheet)){
+
+            ov.style.alignItems=visibleH>=520?'center':'flex-start';
+
+          }
+
+        }
+
+        applyToastAnchor();
+
+      }
+
+      /* Toast containers use position:fixed with GPU compositing (see
+
+         styles.css).  No inline-style anchor needed — fixed positioning
+
+         naturally pins them to the viewport regardless of scroll.  The
+
+         scheduleToastAnchor below just forces a re-paint on scroll so
+
+         the GPU layer stays in sync (iOS Safari quirk). */
+
+      function applyToastAnchor(vt,vh){
+
+        var t=document.getElementById('toast-container');
+
+        if(!t)return;
+
+        // Minimal scroll-sync: just reset any stale inline overrides
+
+        // so CSS position:fixed + transform:translateZ(0) does the work.
+
+        // The old absolute-position + computed-top approach was fragile
+
+        // across scrolls, modals, and cross-origin iframes.
+
+        t.style.position='';
+
+        t.style.top='';
+
+        t.style.bottom='';
+
+        t.style.maxHeight='';
+
+        t.style.overflow='';
+
+        t.style.pointerEvents='';
+
+      }
+
+      function scheduleAnchor(){if(!trackRaf&&active)trackRaf=requestAnimationFrame(applyModalAnchor)}
+
+      function activate(){
+
+        if(active)return;active=true;didAutoScroll=false;
+
+        try{window.parent.addEventListener('scroll',scheduleAnchor,{passive:true});}catch(_){}
+
+        try{window.parent.addEventListener('resize',scheduleAnchor,{passive:true});}catch(_){}
+
+        scheduleAnchor();
+
+      }
+
+      function deactivate(){
+
+        if(!active)return;active=false;
+
+        /* Clear inline overrides FIRST (synchronously) so a rapidly-mounted
+
+           subsequent modal doesn't inherit stale top/height pins from this
+
+           one. The MutationObserver may not fire before React unmounts the
+
+           overlay node, leaving orphaned styles in the DOM otherwise. */
+
+        var modals=document.querySelectorAll('.modal-overlay,.drawer-overlay,.detail-sheet,.detail-sheet-scrim');
+
+        for(var i=0;i<modals.length;i++){
+
+          modals[i].style.top='';modals[i].style.height='';modals[i].style.minHeight='';modals[i].style.alignItems='';
+
+        }
+
+        // Also reset toast container in case the old absolute-position anchor
+
+        // left stale inline styles before the CSS fix was applied.
+
+        applyToastAnchor();
+
+        try{window.parent.removeEventListener('scroll',scheduleAnchor);}catch(_){}
+
+        try{window.parent.removeEventListener('resize',scheduleAnchor);}catch(_){}
+
+      }
+
+      // Activate when `.modal-open` (set by ModalShell) toggles on <html>
+
+      // — cheaper than watching body subtree, and covers every modal.
+
+      new MutationObserver(function(){
+
+        if(document.documentElement.classList.contains('modal-open')||
+
+           document.querySelector('.modal-overlay,.drawer-overlay,.detail-sheet,.detail-sheet-scrim')){
+
+          activate();
+
+        }else{
+
+          deactivate();
+
+        }
+
+      }).observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+
+      // Initial state in case a modal is already mounted (e.g. cookie banner).
+
+      if(document.querySelector('.modal-overlay,.drawer-overlay'))activate();
+
+      /* Always-on toast tracking — independent of modal state. Toasts can
+
+         appear anytime (success/error after a save, etc.) and must always
+
+         land in the user's current view inside the iframe. */
+
+      var toastRaf=0;
+
+      function scheduleToastAnchor(){if(toastRaf)return;toastRaf=requestAnimationFrame(function(){toastRaf=0;applyToastAnchor();});}
+
+      try{window.parent.addEventListener('scroll',scheduleToastAnchor,{passive:true});}catch(_){}
+
+      try{window.parent.addEventListener('resize',scheduleToastAnchor,{passive:true});}catch(_){}
+
+      function watchToastContainer(){
+
+        var tc=document.getElementById('toast-container');
+
+        if(!tc)return false;
+
+        try{new MutationObserver(scheduleToastAnchor).observe(tc,{childList:true});}catch(_){}
+
+        scheduleToastAnchor();
+
+        return true;
+
+      }
+
+      if(!watchToastContainer()){
+
+        /* Toast container not in DOM yet (cookie consent removes it). Watch
+
+           body for it to appear. */
+
+        try{new MutationObserver(function(){if(watchToastContainer()){this.disconnect();}}).observe(document.body||document.documentElement,{childList:true,subtree:true});}catch(_){}
+
+      }
+
+    }catch(_){}
+
+    /* ── Lazy backup poll: 5s interval, paused when tab hidden ── */
+
+    var _bkInt=setInterval(function(){if(!document.hidden)schedule();},5000);
+
+    try{document.addEventListener('visibilitychange',function(){
+
+      if(document.hidden){clearInterval(_bkInt);_bkInt=0;}
+
+      else if(!_bkInt){_bkInt=setInterval(function(){schedule();},5000);}
+
+    });}catch(_){}
+
+  });
+
+}}catch(e){document.documentElement.classList.add('in-iframe');}})();</script>
+
+
+
+<!-- Browser tab / bookmark icon: НИИ science sublogo. -->
+
+<link rel="icon" type="image/png" href="assets/science-logo.png">
+
+<link rel="shortcut icon" type="image/png" href="assets/science-logo.png">
+
+<link rel="apple-touch-icon" href="assets/science-logo.png">
+
+
+
+<!-- Critical above-the-fold images: both institution logos. -->
+
+<link rel="preload" as="image" href="assets/uev-logo.jpg" fetchpriority="high">
+
+<link rel="preload" as="image" href="assets/science-logo.png" fetchpriority="high">
+
+
+
+<!-- Pre-warm critical script payloads in parallel during HTML parse.
+
+     Dashboard, competitions, and documents are preloaded because they are
+
+     the most frequently accessed views on first paint after login.
+
+     Cuts cold-start TTI substantially on slow 3G. -->
+
+<link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin="anonymous" fetchpriority="high">
+
+<link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous" fetchpriority="high">
+
+<!-- Preload Google Fonts CSS + woff2 so first paint never waits on DNS+TLS+font fetch -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" crossorigin>
+<link rel="preload" as="font" href="https://fonts.gstatic.com/s/opensans/v34/mem8Ya5rfrHcvURC6KEwK1U50E883lN0vTHBihU5Z0DMM8-KIXP8rovH2SBgg.woff2" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" as="font" href="https://fonts.gstatic.com/s/merriweather/v30/u-4n0yD9z79B0hunmWfm0gxWCblLQ-UMbfATVYsns.woff2" type="font/woff2" crossorigin="anonymous">
+
+<link rel="preload" as="script" href="js/hostinger-config.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/core-bundle.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/config.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/data-layer.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/utils.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/components.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/veda.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/veda-chat.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/views-bundle.js?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/doc-viewer.js?v=13.0.3" fetchpriority="low">
+
+
+
+<link rel="preload" as="script" href="js/app-v13.01.1.js" fetchpriority="high">
+
+<link rel="preload" as="script" href="js/i18n.js?v=13.0.3" defer>
+
+<link rel="preload" as="script" href="js/config-secrets.js?v=13.0.3">
+
+<link rel="preload" as="script" href="js/main.js?v=13.0.3" defer>
+
+<link rel="preload" as="script" href="js/proposal-extras.js?v=13.0.3">
+
+<link rel="preload" as="style" href="styles.css?v=13.0.3" fetchpriority="high">
+
+<link rel="preload" as="style" href="styles-responsive.css?v=13.0.3" fetchpriority="low">
+<link rel="stylesheet" href="css/uev-responsive.css?v=13.0.3">
+
+
+
+<!-- Render-blocking external CSS is loaded async via media-trick. -->
+
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" crossorigin="anonymous">
+
+<noscript><link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet"></noscript>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+
+
+
+<link rel="stylesheet" href="styles.css?v=13.0.3" media="print" onload="this.media='all'">
+
+<noscript><link rel="stylesheet" href="styles.css?v=13.0.3"></noscript>
+
+<link rel="stylesheet" href="styles-responsive.css?v=13.0.3" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/uev-responsive.css?v=13.0.3">
+
+<!-- ── Procurement module styles ── -->
+<link rel="stylesheet" href="js/features/procurement/procurement.css?v=13.0.3">
+
+<noscript><link rel="stylesheet" href="styles-responsive.css?v=13.0.3"></noscript>
+<link rel="stylesheet" href="css/uev-responsive.css?v=13.0.3">
+
+<style>
+
+/* ── Critical loading-screen CSS (inlined — single source of truth) ──
+
+ *  v9.39.4-rule-play: 33% longer durations, smoother easing, one-shot
+
+ *  fade-out via animation (not transition — prevents re-trigger).
+
+ *  styles.css does NOT redefine #loading-screen — avoids restart. */
+
+#loading-screen{
+
+  position:fixed;inset:0;z-index:var(--z-loader,9999);
+
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;
+
+  background:
+
+    linear-gradient(135deg,#071530 0%,#0F1A4A 22%,#16234A 40%,#1B2C5C 58%,#233874 78%,#0F1A4A 100%);
+
+  background-size:240% 240%;
+
+  animation:lsBgShift 12s cubic-bezier(.45,.05,.55,.95) infinite,
+
+            lsScreenIn .2s cubic-bezier(.4,0,.2,1) both;
+
+  overflow:hidden;contain:strict;
+
+  /* v12.12.0: reduce GPU memory with smaller blur + contain:paint */
+
+  will-change:opacity;
+
+}
+
+#loading-screen::before{
+
+  content:'';position:absolute;inset:-25%;z-index:0;pointer-events:none;
+
+  background:conic-gradient(from 0deg at 50% 50%,rgba(21,147,121,.18) 0deg,rgba(35,56,116,.0) 60deg,rgba(133,133,189,.10) 130deg,rgba(15,126,102,.16) 200deg,rgba(35,56,116,.0) 280deg,rgba(21,147,121,.18) 360deg);
+
+  filter:blur(30px);animation:lsConicSpin 25s linear infinite;
+
+  will-change:transform;transform:translateZ(0);
+
+  /* v12.12.0: reduced opacity for faster paint, slower spin */
+
+}
+
+#loading-screen::after{
+
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+
+  background:radial-gradient(ellipse 60% 50% at 70% 35%,rgba(21,147,121,.14) 0%,transparent 55%),radial-gradient(ellipse 55% 45% at 25% 75%,rgba(133,133,189,.10) 0%,transparent 60%);
+
+  /* v12.12.0: removed third glow layer, reduced opacity */
+
+}
+
+#loading-screen>*{position:relative;z-index:1}
+
+
+
+/* One-shot fade-out: uses animation (not transition) so it can't re-trigger.
+
+   The 'forwards' fill mode keeps opacity:0 after the animation ends. */
+
+#loading-screen.hidden{
+
+  animation:lsFadeOut .22s cubic-bezier(.4,0,.2,1) forwards;
+
+  pointer-events:none;
+
+}
+
+
+
+.ls-logos{display:flex;align-items:center;gap:1.25rem;position:relative;animation:lsLogoIn .73s cubic-bezier(.34,1.48,.64,1) both}
+
+.ls-logos::after{
+
+  content:'';position:absolute;inset:-16px -28px;border-radius:50%;
+
+  background:radial-gradient(ellipse at center,rgba(21,147,121,.22) 0%,rgba(35,56,116,.10) 45%,transparent 70%);
+
+  filter:blur(8px);z-index:-1;pointer-events:none;
+
+  animation:lsLogoGlow 2.5s ease-in-out infinite alternate;
+
+}
+
+.ls-logo{
+
+  position:relative;width:78px;height:78px;border-radius:50%;
+
+  border:2px solid rgba(255,255,255,.22);object-fit:cover;
+
+  background:rgba(255,255,255,.10);
+
+  box-shadow:0 0 0 6px rgba(255,255,255,.04),0 0 30px rgba(21,147,121,.35),0 16px 40px rgba(0,0,0,.35);
+
+  animation:lsLogoBreathe 2.5s ease-in-out infinite;
+
+}
+
+.ls-logos .ls-logo:nth-child(1){animation-delay:0s}
+
+.ls-logos .ls-logo:nth-child(3){animation-delay:.4s}
+
+.ls-logo-sep{
+
+  width:1px;height:52px;
+
+  background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);
+
+  box-shadow:0 0 8px rgba(21,147,121,.45);
+
+  animation:lsSepPulse 2s ease-in-out infinite;
+
+}
+
+.ls-logo-fallback{
+
+  width:84px;height:84px;border-radius:50%;
+
+  border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);
+
+  display:flex;align-items:center;justify-content:center;
+
+  color:rgba(255,255,255,.85);font-family:Merriweather,serif;font-size:1.4rem;font-weight:700;
+
+  box-shadow:0 0 0 10px rgba(255,255,255,.05),0 0 30px rgba(21,147,121,.35),0 20px 50px rgba(0,0,0,.3);
+
+  animation:lsLogoIn .4s cubic-bezier(.34,1.48,.64,1) both,lsLogoBreathe 2.5s .6s ease-in-out infinite;
+
+}
+
+.ls-title{
+
+  font-family:Merriweather,serif;font-size:1.4rem;color:#fff;text-align:center;
+
+  text-shadow:0 2px 18px rgba(21,147,121,.45),0 0 40px rgba(35,56,116,.40);
+
+  animation:lsFadeUp .6s .2s ease both;
+
+}
+
+.ls-sub{
+
+  min-height:1em;line-height:1;display:inline-block;
+
+  font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;
+
+  background:linear-gradient(90deg,rgba(255,255,255,.55) 0%,rgba(133,133,189,.95) 25%,rgba(21,147,121,1) 50%,rgba(133,133,189,.95) 75%,rgba(255,255,255,.55) 100%);
+
+  background-size:200% 100%;
+
+  -webkit-background-clip:text;background-clip:text;
+
+  -webkit-text-fill-color:transparent;color:transparent;
+
+  animation:lsFadeUp .53s .33s ease both,lsSubFlow 5.3s linear infinite;
+
+}
+
+.ls-rule{display:flex;align-items:center;gap:.7rem;animation:lsFadeUp .53s .4s ease both}
+
+.ls-rule::before,.ls-rule::after{content:'';width:44px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55))}
+
+.ls-rule::after{transform:scaleX(-1)}
+
+.ls-rule-dot{width:5px;height:5px;border-radius:50%;background:#159379;box-shadow:0 0 10px rgba(21,147,121,.85);animation:lsDotPulse 2.1s ease-in-out infinite}
+
+.ls-bar{
+
+  width:200px;height:3px;background:rgba(255,255,255,.10);
+
+  border-radius:99px;overflow:hidden;position:relative;
+
+  animation:lsFadeUp .53s .4s ease both;
+
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.30);
+
+}
+
+.ls-bar-fill{
+
+  position:absolute;top:0;left:50%;height:100%;width:100%;
+
+  transform:translateX(-50%) scaleX(0);transform-origin:50% 50%;
+
+  background:linear-gradient(90deg,transparent 0%,rgba(133,133,189,.85) 15%,rgba(21,147,121,1) 35%,rgba(255,255,255,.95) 50%,rgba(21,147,121,1) 65%,rgba(133,133,189,.85) 85%,transparent 100%);
+
+  border-radius:99px;box-shadow:0 0 14px rgba(21,147,121,.7);
+
+  animation:lsBarCenter 2s cubic-bezier(.45,.05,.55,.95) infinite;
+
+  will-change:transform,opacity;
+
+}
+
+
+
+/* ── Keyframes (v12.27.9-loginperf: shorter cycles, faster fade-out) ── */
+
+@keyframes lsScreenIn{from{opacity:0}to{opacity:1}}
+
+@keyframes lsFadeOut{0%{opacity:1}100%{opacity:0;visibility:hidden}}
+
+@keyframes lsBgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+@keyframes lsConicSpin{from{transform:translateZ(0) rotate(0deg)}to{transform:translateZ(0) rotate(360deg)}}
+
+@keyframes lsLogoIn{from{transform:scale(.82) translateZ(0);opacity:0}to{transform:scale(1) translateZ(0);opacity:1}}
+
+@keyframes lsLogoBreathe{0%,100%{box-shadow:0 0 0 6px rgba(255,255,255,.04),0 0 22px rgba(21,147,121,.30),0 16px 40px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 6px rgba(255,255,255,.07),0 0 38px rgba(21,147,121,.55),0 16px 50px rgba(0,0,0,.40)}}
+
+@keyframes lsLogoGlow{0%{opacity:.5;transform:scale(.96)}100%{opacity:1;transform:scale(1.06)}}
+
+@keyframes lsSepPulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+@keyframes lsFadeUp{from{opacity:0;transform:translateY(10px) translateZ(0)}to{opacity:1;transform:translateY(0) translateZ(0)}}
+
+@keyframes lsSubFlow{from{background-position:200% 50%}to{background-position:-200% 50%}}
+
+@keyframes lsDotPulse{0%,100%{transform:scale(1);box-shadow:0 0 8px rgba(21,147,121,.6)}50%{transform:scale(1.4);box-shadow:0 0 18px rgba(21,147,121,1)}}
+
+@keyframes lsBarCenter{0%,100%{transform:translateX(-50%) scaleX(0);opacity:.3}50%{transform:translateX(-50%) scaleX(1);opacity:1}}
+
+/* Prevent FOUC on loading screen subtitle */
+
+html[lang="bg"] .i18n-en{display:none!important}
+
+/* Off-screen rendering optimisation — all list-heavy elements */
+
+.doc-card,.table-wrap table tbody tr{content-visibility:auto;contain-intrinsic-size:auto 56px}
+
+.assign-app-card,.reviewer-pool-item{content-visibility:auto;contain-intrinsic-size:auto 52px}
+
+/* GPU layer promotion for smooth overlay/modal fades */
+
+.modal-overlay,.drawer-overlay,.detail-sheet-scrim{transform:translateZ(0)}
+
+/* Smooth list-item appearance for document checklist */
+
+.wizard-docs-checklist div[role="listitem"]{animation:docItemIn .35s ease both}
+
+.wizard-docs-checklist div[role="listitem"]:nth-child(1){animation-delay:.05s}
+
+.wizard-docs-checklist div[role="listitem"]:nth-child(2){animation-delay:.1s}
+
+.wizard-docs-checklist div[role="listitem"]:nth-child(3){animation-delay:.15s}
+
+.wizard-docs-checklist div[role="listitem"]:nth-child(4){animation-delay:.2s}
+
+.wizard-docs-checklist div[role="listitem"]:nth-child(5){animation-delay:.25s}
+
+@keyframes docItemIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Button hover lift effect */
+
+.btn,.btn-sm{transition:all .2s ease,transform .15s ease!important}
+
+.btn:hover,.btn-sm:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.12)!important}
+
+.btn:active,.btn-sm:active{transform:translateY(0)}
+
+</style>
+
+<!-- v12.59.1: Preconnect to CDNs for faster React loading -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+</head>
+
+<body>
+
+<!-- Skip-to-content link for keyboard/accessibility (first focusable element) -->
+
+<a class="skip-link" href="#main-content" style="position:absolute;top:-100px;left:8px;background:#233874;color:#fff;padding:.6rem 1.2rem;border-radius:0 0 8px 8px;z-index:99999;font-size:.85rem;font-weight:600;text-decoration:none;transition:top .2s ease">Към съдържанието</a>
+
+<style>
+
+.skip-link:focus{top:0;outline:3px solid #159379;outline-offset:2px}
+
+</style>
+
+
+
+<div id="loading-screen" role="status" aria-live="polite" aria-busy="true" aria-label="Зареждане на приложението"> 
+
+  <div class="ls-logos">
+
+    <img class="ls-logo" src="assets/uev-logo.jpg" alt="Икономически университет – Варна" width="78" height="78" onerror="this.style.display='none';var f=document.createElement('div');f.className='ls-logo-fallback';f.textContent='ИУВ';this.parentNode.insertBefore(f,this)">
+
+    <div class="ls-logo-sep"></div>
+
+    <img class="ls-logo" src="assets/science-logo.png" alt="Научноизследователски институт" width="78" height="78" fetchpriority="high" onerror="this.style.display='none';var f=document.createElement('div');f.className='ls-logo-fallback';f.textContent='НИИ';this.parentNode.insertBefore(f,this)">
+
+  </div>
+
+  <div class="ls-title"><span class="i18n-bg" translate="no">Икономически университет – Варна</span><span class="i18n-en" translate="no">University of Economics – Varna</span></div>
+
+  <div class="ls-rule"><span class="ls-rule-dot"></span></div>
+
+  <div class="ls-sub"><span class="i18n-bg" translate="no">Научноизследователски институт</span><span class="i18n-en" translate="no">Science and Research</span></div>
+
+  <div class="ls-bar"><div class="ls-bar-fill"></div></div>
+
+</div>
+
+
+
+<div id="root"></div>
+
+<div id="auth-transition" class="auth-transition-overlay" style="display:none">
+
+<div class="auth-transition-spinner"></div>
+
+<div class="auth-transition-label" id="auth-transition-label">Вход в системата</div>
+
+<div class="auth-transition-steps">
+
+  <div class="auth-step" id="auth-step-1"><span class="auth-step-icon"><i class="fas fa-shield-halved"></i></span><span>Проверка</span></div>
+
+  <div class="auth-step" id="auth-step-2"><span class="auth-step-icon"><i class="fas fa-trophy"></i></span><span>Конкурси</span></div>
+
+  <div class="auth-step" id="auth-step-3"><span class="auth-step-icon"><i class="fas fa-table"></i></span><span>Табло</span></div>
+
+</div>
+
+</div>
+
+<!-- Two parallel toast containers — the polite one for routine notifications,
+
+     the assertive one (role=alert) for errors/warnings so screen readers
+
+     interrupt the user immediately. utils.js#toast routes by `type`. -->
+
+<div id="toast-container" aria-live="polite" aria-atomic="false" role="status"></div>
+
+<div id="toast-container-alerts" aria-live="assertive" aria-atomic="false" role="alert"></div>
+
+
+
+<!-- v12.21.1: Connectivity status banner — slides in from top when backend degrades -->
+
+<div id="connectivity-banner" class="connectivity-banner" role="status" aria-live="polite" style="display:none">
+
+  <i class="fas fa-circle-exclamation"></i>
+
+  <span id="connectivity-banner-msg"></span>
+
+  <button class="conn-banner-dismiss" onclick="this.parentNode.classList.remove('visible','degraded','offline','restored');this.parentNode.style.display='none'" aria-label="Затвори">&times;</button>
+
+</div>
+
+
+
+<script>
+
+/**
+
+ * ── Connectivity banner controller (v12.21.1) ────────────────────
+
+ * Listens for erp:connectivity-change events and shows/hides the
+
+ * inline banner at the top of the page. Auto-hides restored banners
+
+ * after 2.5s.
+
+ */
+
+(function(){
+
+  var _banner = null;
+
+  var _autoHideTimer = null;
+
+  var _lastState = null;
+
+
+
+  function _getBanner(){
+
+    if (!_banner) _banner = document.getElementById('connectivity-banner');
+
+    return _banner;
+
+  }
+
+
+
+  function _showBanner(msg, type){
+
+    var b = _getBanner();
+
+    if (!b) return;
+
+    var msgEl = document.getElementById('connectivity-banner-msg');
+
+    if (msgEl) msgEl.textContent = msg;
+
+    b.className = 'connectivity-banner ' + type + ' visible';
+
+    b.style.display = 'flex';
+
+    if (_autoHideTimer) { clearTimeout(_autoHideTimer); _autoHideTimer = null; }
+
+  }
+
+
+
+  function _hideBanner(delayMs){
+
+    if (_autoHideTimer) clearTimeout(_autoHideTimer);
+
+    if (!delayMs) {
+
+      var b = _getBanner();
+
+      if (b) { b.classList.remove('visible'); b.style.display = 'none'; }
+
+      return;
+
+    }
+
+    _autoHideTimer = setTimeout(function(){
+
+      _autoHideTimer = null;
+
+      var b = _getBanner();
+
+      if (b) { b.classList.remove('visible'); b.style.display = 'none'; }
+
+    }, delayMs);
+
+  }
+
+
+
+  window.addEventListener('erp:connectivity-change', function(ev){
+
+    var d = ev && ev.detail;
+
+    if (!d) return;
+
+    var now = Date.now();
+
+
+
+    // Debounce: ignore rapid repeats within 2s
+
+    if (_lastState && (now - _lastState.ts) < 2000) {
+
+      if (_lastState.gasUp === d.gasReachable && _lastState.phpUp === d.phpReachable) return;
+
+    }
+
+    _lastState = Object.assign({ ts: now }, d);
+
+
+
+    var gasDown = d.gasReachable === false;
+
+    var phpDown = d.phpReachable === false;
+
+    var allDown = gasDown && phpDown;
+
+    var gasRestored = d.gasReachable === true;
+
+    var phpRestored = d.phpReachable === true;
+
+
+
+    if (allDown) {
+
+      _showBanner('Няма връзка със сървъра. Данните се зареждат от кеша.', 'offline');
+
+    } else if (phpDown && !gasDown) {
+
+      // PHP (primary) is down — GAS (backup) is handling requests
+
+      _showBanner('Основният сървър за данни е недостъпен. Работи се през резервен канал.', 'degraded', 8000);
+
+    } else if (gasDown && !phpDown) {
+
+      // GAS (backup) is down — PHP (primary) is working normally
+
+      // v12.30.1: Suppress banner — PHP is the primary backend, app works fine
+
+      _hideBanner(0);
+
+    } else if (gasRestored || phpRestored) {
+
+      _hideBanner(0);
+
+    } else {
+
+      _hideBanner(0);
+
+    }
+
+  });
+
+
+
+  // Online/offline
+
+  window.addEventListener('offline', function(){
+
+    _showBanner('Няма интернет връзка. Промените ще бъдат запазени локално.', 'offline');
+
+  });
+
+  window.addEventListener('online', function(){
+
+    _hideBanner(0);
+
+  });
+
+
+
+  // v12.30.0-fix: Proactive GAS recovery probe when banner is shown
+
+  // Uses a mutation observer to detect when the banner appears for GAS-down
+
+  var _bannerObserver = null;
+
+  function _startGasProbe() {
+
+    if (_bannerObserver) return;
+
+    var _probeDelay = 6000; // wait 6s after banner appears
+
+    var _probeTimer = null;
+
+    function _doProbe() {
+
+      try {
+
+        var _probeUrl = (typeof window.__ERP_getGASURL === 'function') ? window.__ERP_getGASURL() : (window.__ERP_GAS_URL || '');
+
+        if (_probeUrl && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+
+          var _img = new Image();
+
+          var _sep = _probeUrl.indexOf('?') >= 0 ? '&' : '?';
+
+          _img.onload = function() {
+
+            try { window.dispatchEvent(new CustomEvent('erp:connectivity-change', { detail: { gasReachable: true, phpReachable: true } })); } catch(_) {}
+
+          };
+
+          _img.onerror = function() { /* still down */ };
+
+          _img.src = _probeUrl + _sep + 'action=ping&_t=' + Date.now();
+
+        }
+
+      } catch(_) {}
+
+    }
+
+    _bannerObserver = new MutationObserver(function() {
+
+      var b = document.getElementById('connectivity-banner');
+
+      if (b && b.classList.contains('visible') && b.textContent.indexOf('сървър за данни') >= 0) {
+
+        if (!_probeTimer) {
+
+          _probeTimer = setTimeout(function() {
+
+            _probeTimer = null;
+
+            _doProbe();
+
+          }, _probeDelay);
+
+        }
+
+      } else {
+
+        if (_probeTimer) { clearTimeout(_probeTimer); _probeTimer = null; }
+
+      }
+
+    });
+
+    try { _bannerObserver.observe(document.body, { childList: true, subtree: true, characterData: true }); } catch(_) {}
+
+  }
+
+  // Start observer after DOM ready
+
+  if (document.readyState === 'loading') {
+
+    document.addEventListener('DOMContentLoaded', _startGasProbe);
+
+  } else {
+
+    _startGasProbe();
+
+  }
+
+})();
+
+</script>
+
+
+
+<script>
+
+/* ── QoL helpers — minimal, framework-free ───────────────────────── */
+
+(function(){
+
+  if(window.__erpQol)return;window.__erpQol=true;
+
+
+
+  /* '/' or Ctrl/Cmd+K → focus the first visible search input.
+
+     Skipped when typing in an input/textarea/contenteditable. */
+
+  document.addEventListener('keydown',function(ev){
+
+    var k=ev.key;var slash=(k==='/'&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey);
+
+    var ck=((ev.ctrlKey||ev.metaKey)&&(k==='k'||k==='K'));
+
+    if(!slash&&!ck)return;
+
+    var t=ev.target;var tag=t&&t.tagName;
+
+    if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable))return;
+
+    var box=document.querySelector('.search-input, input[type="search"]');
+
+    if(!box)return;
+
+    ev.preventDefault();box.focus();try{box.select()}catch(_){}
+
+  });
+
+
+
+  /* Home/End in non-input context → top/bottom scroll (already native, but
+
+     some embedders trap it). Best-effort, no preventDefault. */
+
+})();
+
+</script>
+
+
+
+<script>
+
+window.ERP_CONFIG=Object.assign(window.ERP_CONFIG||{},{
+
+  // ── GAS URL — resolved synchronously by core-bundle.js at boot ──
+
+  // Spliced shards A+B+C are reassembled and decoded at startup.
+
+  // Part A is below, Part B is in js/core-bundle.js, Part C is below.
+
+  __ERP_GAS_SLICE_A: 'v1.hOY7jOT=S@`:QwjOX|a9@}a9sStU}iZ@{`^Ui:T}j@I',
+
+  // ── SPLICE PART C (3/3) — third shard ──────────────────────────────
+
+  __ERP_GAS_SLICE_C: 'Qj_`Y^w[a[H]rU:`p8p]OIOTt8[]`~Z_]=l_YqlKI<\\Z@slN]q',
+
+  // ── ENCODED BLOB (Tier 3 — single encoded, faster decode) ──────────
+
+  // Generated: node scripts/encode-gs-url.js "<real-exec-url>"
+
+  __ERP_GAS_ENCODED: 'v1.hOY7jOT=S@`:QwjOX|a9@}a9sStU}iZ@{`^Ui:T}j@IZ9a<`9Q<T7<`lKQ^[QvTKU:YarT[MPi7pl_sQZ8jY]?7Y9]Qj_`Y^w[a[H]rU:`p8p]OIOTt8[]`~Z_]=l_YqlKI<\\Z@slN]q',
+
+  // ── GAS_URL — resolved at runtime by gas-proxy.js from spliced shards ──
+
+  // ── GOOGLE OAUTH CLIENT ID (encoded, defence-in-depth) ──────────
+
+  // Decoded at runtime by gas-proxy.js (same v1 shift-7 algorithm).
+
+  // When config-secrets.js is missing (gitignored), this fallback
+
+  // ensures Google Sign-In always has a valid client_id.
+
+  // Generated: node scripts/encode-gs-url.js "<client-id>"
+
+  __ERP_GOOGLE_CLIENT_ID_ENCODED: 'v1.V[X:TPVKn9VKn;S^vUtwhKkqkqrT_TjuaV[Uzh:QzUuH:aqsri^QqStM~jOT|a9@}a9sk_UsjtU}iuYsiuX|`9@{',
+
+  // ────────────────────────────────────────────────────────────────────
+
+  // Google OAuth redirects, public-results page links, and all external
+
+  // CTA URLs resolve against this origin — NOT the GAS /exec hosting.
+
+  PARENT_ORIGIN:'https://scienceandresearch.ue-varna.bg',
+
+  // Full path to the parent page that embeds this SPA (used for OAuth
+
+  // login_uri and sharable public-results links).
+
+  PARENT_PAGE_PATH:'/nauchni-proekti/',
+
+  MAX_FILE_SIZE_BYTES:10*1024*1024,
+
+  PROJECT_TYPES:[
+
+    {value:'ФНИ',label:'Фундаментални научни изследвания (ФНИ)',maxBudget:12000,minDurationMonths:12,maxDurationMonths:36,maxTeamMembers:5,maxStudentCollaborators:3,noExpensesFirstMonth:true,reviewerFee:60,reviewerFeeCurrency:'EUR',monographReviewerFeeEUR:250,monographPerReviewFeeEUR:100,requiresSelfAssessment:true,budgetStructure:['salaries','external_services','assets','consumables','literature','travel','publications','reviews','other']},
+
+    {value:'ПНИ',label:'Приложни научни изследвания (ПНИ)',maxBudget:12000,minDurationMonths:12,maxDurationMonths:36,maxTeamMembers:5,maxStudentCollaborators:3,noExpensesFirstMonth:true,reviewerFee:60,reviewerFeeCurrency:'EUR',requiresTRL:true,requiresSupportLetters:true,requiresSelfAssessment:true,budgetStructure:['salaries','external_services','assets','consumables','literature','travel','publications','reviews','other']},
+
+    {value:'ДНП',label:'Подпомагане разработването на докторски дисертации (ДНП)',maxBudget:5000,minDurationMonths:12,maxDurationMonths:12,reviewerFee:60,reviewerFeeCurrency:'EUR',noTeamRemuneration:true,requiresSelfAssessment:true,budgetStructure:['external_services','consumables','literature','travel','publications','reviews','other']},
+
+    {value:'НПФ',label:'Частично финансиране на научни форуми (НПФ)',maxBudget:6000,maxBudgetBGN:10000,minDurationMonths:1,maxDurationMonths:3,reviewerFee:51,reviewerFeeCurrency:'EUR',requiresSelfAssessment:false,npfTiers:{department:{maxBGN:4000,maxEUR:3000,label:'Катедрен форум'},faculty:{maxBGN:4884,maxEUR:2500,label:'Кръгла маса'},university:{maxBGN:11735,maxEUR:6000,label:'Університетски/национален форум'}},budgetStructure:['salaries','external_services','consumables','travel','publications','reviews','other']}
+
+  ],
+
+  PRIORITY_AREAS:[
+
+    'Глобални пазари и инвестиции','Индустрия 5.0, технологични иновации и когнитивни системи',
+
+    'Зелена икономика и устойчиво развитие',
+
+    'Дигитална трансформация и изкуствен интелект в бизнеса и висшето образование',
+
+    'Управление на данни за бизнес решения',
+
+    'Регионални стратегии и развитие на човешките ресурси'
+
+  ],
+
+  LOGO_URL:'assets/science-logo.png',
+
+  UEV_LOGO_URL:'assets/uev-logo.jpg',
+
+  ANALYTICS_ENDPOINT:'https://formspree.io/f/mvgdgygr'
+
+});
+
+// v12.30.0-perf: Re-resolve postMessage target origin now that ERP_CONFIG has PARENT_ORIGIN
+
+try{ if (typeof _refreshPostTargetOrigin_ === 'function') _refreshPostTargetOrigin_(); } catch(_){}
+
+</script>
+
+
+<script>
+/* ─── Boot orchestration (v12.54.11-loadingfix) ──────────────────────────────
+
+ * 1. Single authoritative hide: listen for 'erp-ui-mounted' event
+ *    dispatched by the React app on mount. No fast-path/fallback races.
+ * 2. Surface fatal errors from OUR scripts as a banner; ignore noise from
+ *    extensions / cross-origin scripts.
+ * 3. Recover from a blank #root after BLANK_TIMEOUT (generous timeout).
+ * ───────────────────────────────────────────────────────────────────────── */
+
+(function(){
+  var bootStart      = Date.now();
+  var MIN_VISIBLE_MS = 0;      // v12.27.9: no minimum — hide as soon as app is ready
+  var HARD_TIMEOUT   = 10000;  // kept for reference (unused)
+  var BLANK_TIMEOUT  = 15000;  // v12.27.9: cold-cache + 30+ scripts need time to mount
+  var _FADE_DURATION = 250;    // match CSS fade-out + small buffer
+  var loaderHidden   = false;
+
+  function hideLoader(delay){
+    if (loaderHidden) return; loaderHidden = true;
+    setTimeout(function(){
+      var s = document.getElementById('loading-screen'); if (!s) return;
+      s.classList.add('hidden');
+      setTimeout(function(){ try { if (s && s.parentNode) s.parentNode.removeChild(s); } catch(_){} }, _FADE_DURATION);
+    }, Math.max(0, delay|0));
+  }
+
+  function hideWhenReady(){ hideLoader(0); } // v12.27.9: no minimum delay — hide immediately
+
+  // Single authoritative hide: listen for app mount event
+  // v12.54.11: Single authoritative hide — no duplicate fast-path/fallback races.
+  // The app dispatches 'erp-ui-mounted' exactly once on mount.
+  window.addEventListener('erp-ui-mounted', hideWhenReady, { once: true });
+
+  // Unhandled rejection handler — hide loader on genuine app errors
+  window.addEventListener('unhandledrejection', function(ev){
+    var msg = (ev && ev.reason && ev.reason.message) ? ev.reason.message : String((ev && ev.reason) || '');
+    if (/Failed to fetch|NetworkError|Load failed|Script error/i.test(msg)) return;
+    hideLoader(0);
+  });
+
+  // BLANK_TIMEOUT fallback — if root is still empty after generous timeout,
+  // surface an error banner with diagnostics instead of a spinner.
+  setTimeout(function(){
+    var root = document.getElementById('root');
+    if (!root || root.hasChildNodes() || document.querySelector('.boot-error-banner')) return;
+    hideLoader(0);
+    var _diag = '';
+    try {
+      var bi = window.__bootErrorInfo;
+      if (bi && bi.message) {
+        _diag = 'Засечена грешка при стартиране: ' + bi.message
+              + ' @ ' + bi.file + ':' + bi.lineno + ':' + bi.colno
+              + (bi.ts ? ' (след ' + Math.round(bi.ts/1000) + 's)' : '');
+      } else {
+        var _net = window.navigator && navigator.onLine ? 'online' : 'offline';
+        _diag = 'Интернет статус: ' + _net + '. Ако сте online, някой от скриптовете не се зареди (блокирани от разширение за реклами, CORS или прекъсната връзка). Проверете конзолата (F12) за детайли.';
+        if (/^\/applications\/[^/]+$/.test(window.location.pathname) || /^\/projects(\/|$)/.test(window.location.pathname)) {
+          _diag += ' Дълбоката връзка за конкретното предложение не се зареди — опитайте да рефрешнете или проверете конзолата.';
+        }
+      }
+    } catch(_) { _diag = 'Проверете конзолата (F12) за детайли.'; }
+    root.innerHTML =
+      '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;background:#F4F5F7">'
+    + '<div style="text-align:center;max-width:560px;padding:2rem">'
+    + '<div style="font-size:3rem;margin-bottom:1rem">⚠️</div>'
+    + '<h2 style="margin:0 0 .5rem;color:#181818">Системата не може да се зареди</h2>'
+    + '<p style="color:#505050;margin:0 0 1.5rem;line-height:1.6;font-size:.85rem">' + _diag + '</p>'
+    + '<button onclick="location.reload()" style="padding:.6rem 1.5rem;background:#233874;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem">Опресни страницата</button>'
+    + '</div></div>';
+  }, BLANK_TIMEOUT);
+})();
+</script>
+
+<!-- ── External libraries (CDN) ─────────────────────────────────────── -->
+
+<script src="https://accounts.google.com/gsi/client" async defer
+
+        onload="window._gsiReady=true;window.dispatchEvent(new Event('gsi-ready'))"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"
+
+        crossorigin="anonymous"
+
+        onerror="document.getElementById('loading-screen')&&document.getElementById('loading-screen').classList.add('hidden');document.getElementById('root').innerHTML='<div style=\'padding:2rem;text-align:center;font-family:sans-serif\'><h2>Грешка при зареждане</h2><p>React библиотеката не можа да се зареди. Проверете интернет връзката.</p><button onclick=\'location.reload()\'>Опресни</button></div>'"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"
+
+        crossorigin="anonymous"
+
+        onerror="document.getElementById('root').innerHTML='<div style=\'padding:2rem;text-align:center;font-family:sans-serif\'><h2>Грешка при зареждане</h2><p>ReactDOM не можа да се зареди. Проверете интернет връзката.</p><button onclick=\'location.reload()\'>Опресни</button></div>'"></script>
+
+
+
+<!-- ── Application bundle (defer preserves order: core-bundle → config → utils → i18n → components → views → app) ── -->
+
+<script>window.__ERP_BUILD="13.0.3";</script>
+<script id="preloaded-state">
+
+/* ── SSR Preloaded State ────────────────────────────────────────────
+
+ * Embedded at build time by scripts/prerender.js.
+
+ * The React app reads this on boot to skip the initial API round-trip.
+
+ * Stale check: if Date.now() - __PRELOADED_STATE__.ts > 5 min, the
+
+ * app will refresh in the background but still render immediately. */
+
+window.__PRELOADED_STATE__ = {"v": 1, "ts": 1789194735370, "competitions": {"success": true, "competitions": [{"totalCount": 57}], "data": [{"totalCount": 57}], "_truncated": false}, "forms": {"success": true, "forms": [{"id": "f_493af6f6c06ebbc9", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-09-10 22:27:14", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 1, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1d6cfab6e274557c", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 Капацитет и опит на екипа.docx\",\"folderName\":\"\",\"driveId\":\"\",\"fileId\":\"\",\"mimeType\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"previewLink\":\"\",\"downloadUrl\":\"\",\"googleDocEditLink\":\"\",\"content\":\"\",\"_generated\":false,\"docType\":\"\",\"_budget\":false,\"webViewLink\":\"\",\"isGoogleDoc\":false,\"size\":139386,\"typeLabel\":\"\",\"editUrl\":\"\",\"editLink\":\"\"},{\"id\":\"doc_d28e1c98ea450325\",\"name\":\"01-02 ФНИ Допустими разходи 2026.docx\",\"folderName\":\"10 Бюджет\",\"driveId\":\"\",\"fileId\":\"\",\"mimeType\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"previewLink\":\"\",\"downloadUrl\":\"\",\"googleDocEditLink\":\"\",\"content\":\"\",\"_generated\":false,\"docType\":\"\",\"_budget\":false,\"webViewLink\":\"\",\"isGoogleDoc\":false,\"size\":11193,\"typeLabel\":\"\",\"editUrl\":\"\",\"editLink\":\"\"}]", "history": null, "created": "2026-08-20 18:36:35", "updatedAt": "2026-09-02 09:49:37", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 1, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_36bf8766b92ed960", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-19T03:49:01+03:00\"},{\"id\":\"doc_635c9dcf90033426\",\"name\":\"\u0411\u044e\u0434\u0436\u0435\u0442\u043d\u0430 \u043e\u0431\u043e\u0441\u043d\u043e\u0432\u043a\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-20T18:25:56+03:00\"},{\"id\":\"doc_5e1128824c3e1e59\",\"name\":\"01-02 \u0424\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11193,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-20T18:25:56+03:00\"},{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-25T06:02:05+03:00\"},{\"id\":\"doc_8db9d85dff5f9d77\",\"name\":\"\u041f\u0438\u0441\u043c\u0430 \u0437\u0430 \u043f\u043e\u0434\u043a\u0440\u0435\u043f\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-25T06:02:18+03:00\"}]", "history": null, "created": "2026-08-19 02:14:14", "updatedAt": "2026-08-25 06:02:18", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1ba4eda82e74836a", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:14:05", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_a7a1ddde97ffbcab", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:05:15", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8f66478f9950bee3", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:05:06", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_89dbad7f6f327b9c", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 00:02:08", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_5301d072bdef2f83", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"01-01_\u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442_\u0438_\u043e\u043f\u0438\u0442_\u043d\u0430_\u0435\u043a\u0438\u043f\u0430_docx_daa9436d\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-18T12:31:43+03:00\"},{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-18T12:31:43+03:00\"}]", "history": null, "created": "2026-08-15 21:06:47", "updatedAt": "2026-08-18 12:31:43", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1101d470f2e803b6", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-15 17:20:30", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_d4f568963b919fe2", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-15 17:20:22", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_afdcacbef32965ad", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-13T15:41:22+03:00\"},{\"id\":\"01-05_\u0424\u041d\u0418_\u041f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435_3_\u0411\u044e\u0434\u0436\u0435\u0442_\u043d\u0430_\u043f\u0440\u043e_f893d1a8\",\"name\":\"01-05 \u0424\u041d\u0418 \u041f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 3 \u0411\u044e\u0434\u0436\u0435\u0442 \u043d\u0430 \u043f\u0440\u043e\u0435\u043a\u0442\u0430 - Locked.xlsx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"size\":22061,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-13T16:09:30+03:00\"},{\"id\":\"01-02_\u0424\u041d\u0418_\u0424\u043e\u0440\u043c\u0443\u043b\u044f\u0440_\u0437\u0430_\u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u0441\u0442\u0432\u0430?_98ad0ac9\",\"name\":\"01-02 \u0424\u041d\u0418 \u0424\u043e\u0440\u043c\u0443\u043b\u044f\u0440 \u0437\u0430 \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u0441\u0442\u0432\u0430\u043d\u0435 \u0420\u0430\u0437\u0434\u0435\u043b\u0438 3-5.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":5504527,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-15T12:56:35+03:00\"}]", "history": null, "created": "2026-08-12 10:26:43", "updatedAt": "2026-08-15 12:56:35", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8c6e193a3f497d8d", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-12T09:58:23+03:00\"}]", "history": null, "created": "2026-08-12 00:22:37", "updatedAt": "2026-08-12 09:58:23", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_dffd41ce1b78134a", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-12 00:22:27", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_27ca448a34f06968", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"01-02_\u0424\u041d\u0418_\u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438_\u0440\u0430\u0437\u0445\u043e\u0434\u0438_2026_docx_ddd6ad0e\",\"name\":\"01-02 \u0424\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11193,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-11T11:42:59+03:00\"},{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-11T11:42:59+03:00\"}]", "history": null, "created": "2026-08-11 10:10:31", "updatedAt": "2026-08-11 11:42:59", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_17d6921fe048d492", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 10:10:20", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_4a352bbc2f2310ee", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 09:58:41", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_3529c0027b320ead", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 09:58:25", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8162fb3e0a075623", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_635c9dcf90033426\",\"name\":\"\u0411\u044e\u0434\u0436\u0435\u0442\u043d\u0430 \u043e\u0431\u043e\u0441\u043d\u043e\u0432\u043a\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-01T01:40:31+03:00\"},{\"id\":\"01-01_\u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442_\u0438_\u043e\u043f\u0438\u0442_\u043d\u0430_\u0435\u043a\u0438\u043f\u0430_docx_daa9436d\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-01T14:00:40+00:00\"},{\"id\":\"02-02_\u041f\u041d\u0418_\u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438_\u0440\u0430\u0437\u0445\u043e\u0434\u0438_2026_docx_72a71e2b\",\"name\":\"02-02 \u041f\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11154,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-01T14:00:40+00:00\"}]", "history": null, "created": "2026-07-31 21:36:30", "updatedAt": "2026-08-01 14:00:40", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_6354235268a501e2", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-07-31 21:36:27", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_bb04faafbc12e53b", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-07-31 21:36:22", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}], "data": [{"id": "f_493af6f6c06ebbc9", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-09-10 22:27:14", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 1, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1d6cfab6e274557c", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 Капацитет и опит на екипа.docx\",\"folderName\":\"\",\"driveId\":\"\",\"fileId\":\"\",\"mimeType\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"previewLink\":\"\",\"downloadUrl\":\"\",\"googleDocEditLink\":\"\",\"content\":\"\",\"_generated\":false,\"docType\":\"\",\"_budget\":false,\"webViewLink\":\"\",\"isGoogleDoc\":false,\"size\":139386,\"typeLabel\":\"\",\"editUrl\":\"\",\"editLink\":\"\"},{\"id\":\"doc_d28e1c98ea450325\",\"name\":\"01-02 ФНИ Допустими разходи 2026.docx\",\"folderName\":\"10 Бюджет\",\"driveId\":\"\",\"fileId\":\"\",\"mimeType\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"previewLink\":\"\",\"downloadUrl\":\"\",\"googleDocEditLink\":\"\",\"content\":\"\",\"_generated\":false,\"docType\":\"\",\"_budget\":false,\"webViewLink\":\"\",\"isGoogleDoc\":false,\"size\":11193,\"typeLabel\":\"\",\"editUrl\":\"\",\"editLink\":\"\"}]", "history": null, "created": "2026-08-20 18:36:35", "updatedAt": "2026-09-02 09:49:37", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 1, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_36bf8766b92ed960", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-19T03:49:01+03:00\"},{\"id\":\"doc_635c9dcf90033426\",\"name\":\"\u0411\u044e\u0434\u0436\u0435\u0442\u043d\u0430 \u043e\u0431\u043e\u0441\u043d\u043e\u0432\u043a\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-20T18:25:56+03:00\"},{\"id\":\"doc_5e1128824c3e1e59\",\"name\":\"01-02 \u0424\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11193,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-20T18:25:56+03:00\"},{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-25T06:02:05+03:00\"},{\"id\":\"doc_8db9d85dff5f9d77\",\"name\":\"\u041f\u0438\u0441\u043c\u0430 \u0437\u0430 \u043f\u043e\u0434\u043a\u0440\u0435\u043f\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-25T06:02:18+03:00\"}]", "history": null, "created": "2026-08-19 02:14:14", "updatedAt": "2026-08-25 06:02:18", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1ba4eda82e74836a", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:14:05", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_a7a1ddde97ffbcab", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:05:15", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8f66478f9950bee3", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 02:05:06", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_89dbad7f6f327b9c", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-19 00:02:08", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_5301d072bdef2f83", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"01-01_\u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442_\u0438_\u043e\u043f\u0438\u0442_\u043d\u0430_\u0435\u043a\u0438\u043f\u0430_docx_daa9436d\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-18T12:31:43+03:00\"},{\"id\":\"doc_7034d5922ad491e5\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":\"\",\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-18T12:31:43+03:00\"}]", "history": null, "created": "2026-08-15 21:06:47", "updatedAt": "2026-08-18 12:31:43", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_1101d470f2e803b6", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-15 17:20:30", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_d4f568963b919fe2", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-15 17:20:22", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_afdcacbef32965ad", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-13T15:41:22+03:00\"},{\"id\":\"01-05_\u0424\u041d\u0418_\u041f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435_3_\u0411\u044e\u0434\u0436\u0435\u0442_\u043d\u0430_\u043f\u0440\u043e_f893d1a8\",\"name\":\"01-05 \u0424\u041d\u0418 \u041f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 3 \u0411\u044e\u0434\u0436\u0435\u0442 \u043d\u0430 \u043f\u0440\u043e\u0435\u043a\u0442\u0430 - Locked.xlsx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",\"size\":22061,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-13T16:09:30+03:00\"},{\"id\":\"01-02_\u0424\u041d\u0418_\u0424\u043e\u0440\u043c\u0443\u043b\u044f\u0440_\u0437\u0430_\u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u0441\u0442\u0432\u0430?_98ad0ac9\",\"name\":\"01-02 \u0424\u041d\u0418 \u0424\u043e\u0440\u043c\u0443\u043b\u044f\u0440 \u0437\u0430 \u043a\u0430\u043d\u0434\u0438\u0434\u0430\u0442\u0441\u0442\u0432\u0430\u043d\u0435 \u0420\u0430\u0437\u0434\u0435\u043b\u0438 3-5.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":5504527,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-15T12:56:35+03:00\"}]", "history": null, "created": "2026-08-12 10:26:43", "updatedAt": "2026-08-15 12:56:35", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8c6e193a3f497d8d", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-12T09:58:23+03:00\"}]", "history": null, "created": "2026-08-12 00:22:37", "updatedAt": "2026-08-12 09:58:23", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_dffd41ce1b78134a", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-12 00:22:27", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_27ca448a34f06968", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"01-02_\u0424\u041d\u0418_\u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438_\u0440\u0430\u0437\u0445\u043e\u0434\u0438_2026_docx_ddd6ad0e\",\"name\":\"01-02 \u0424\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11193,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-11T11:42:59+03:00\"},{\"id\":\"doc_29052fa3057557e4\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-11T11:42:59+03:00\"}]", "history": null, "created": "2026-08-11 10:10:31", "updatedAt": "2026-08-11 11:42:59", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_17d6921fe048d492", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 10:10:20", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_4a352bbc2f2310ee", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 09:58:41", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_3529c0027b320ead", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-08-11 09:58:25", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_8162fb3e0a075623", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": "[{\"id\":\"doc_635c9dcf90033426\",\"name\":\"\u0411\u044e\u0434\u0436\u0435\u0442\u043d\u0430 \u043e\u0431\u043e\u0441\u043d\u043e\u0432\u043a\u0430\",\"mime_type\":\"text\/plain\",\"size\":0,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"copied\",\"attached_at\":\"2026-08-01T01:40:31+03:00\"},{\"id\":\"01-01_\u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442_\u0438_\u043e\u043f\u0438\u0442_\u043d\u0430_\u0435\u043a\u0438\u043f\u0430_docx_daa9436d\",\"name\":\"01-01 \u041a\u0430\u043f\u0430\u0446\u0438\u0442\u0435\u0442 \u0438 \u043e\u043f\u0438\u0442 \u043d\u0430 \u0435\u043a\u0438\u043f\u0430.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":139386,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-01T14:00:40+00:00\"},{\"id\":\"02-02_\u041f\u041d\u0418_\u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438_\u0440\u0430\u0437\u0445\u043e\u0434\u0438_2026_docx_72a71e2b\",\"name\":\"02-02 \u041f\u041d\u0418 \u0414\u043e\u043f\u0443\u0441\u0442\u0438\u043c\u0438 \u0440\u0430\u0437\u0445\u043e\u0434\u0438 2026.docx\",\"mime_type\":\"application\/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"size\":11154,\"drive_id\":null,\"web_view_link\":null,\"download_url\":null,\"preview_link\":null,\"category\":null,\"origin\":\"library\",\"attached_at\":\"2026-08-01T14:00:40+00:00\"}]", "history": null, "created": "2026-07-31 21:36:30", "updatedAt": "2026-08-01 14:00:40", "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_6354235268a501e2", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-07-31 21:36:27", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}, {"id": "f_bb04faafbc12e53b", "userEmail": "yonistoykov@ue-varna.bg", "userName": "", "competition": null, "projectCode": "", "title": null, "titleEn": null, "area": "", "description": null, "descriptionEn": null, "status": "draft", "submitted": null, "returnComment": null, "fileIds": null, "attachedDocs": null, "history": null, "created": "2026-07-31 21:36:22", "updatedAt": null, "signature": null, "signatureAdmin": null, "teamMembers": null, "reviewers": null, "evaluation": null, "contractId": null, "budget": null, "budgetData": null, "formData": null, "durationMonths": 12, "objectives": null, "expectedResults": null, "indicators": null, "eligibilityChecklist": null, "score": null, "rank": null, "workProgram": null, "professionalField": null, "acronym": null, "selfAssessmentScore": 0, "npfTier": null, "rowVersion": 0, "projectType": "", "dataVersion": 1, "statusLabel": "Чернова", "competitionName": null, "competitionYear": null, "competitionDeadline": null, "reviewerCount": 0, "activeReviews": "0", "completedReviews": "0", "hasSelfAssessment": 1, "hasBudget": 0, "docCount": 0}], "isAdmin": false, "_truncated": true}, "documents": {"success": true, "documents": [], "skipped": true, "count": 0}, "build": "12.59.1"};
+
+</script>
+
+
+
+<script src="js/hostinger-config.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<!-- ── Laravel Backend Config — routes ALL API calls to /api ───────────── -->
+
+<script src="js/hostinger-config-laravel.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/core-bundle.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/api.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/config.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/data-layer.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/utils.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/config-secrets.js?v=13.0.3" defer></script>
+
+<!-- v8 docSQL: Instant document service (loaded early for fast document ops) -->
+
+<script src="js/services/documents.js?v=13.0.3" defer></script>
+
+<script src="js/components.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/veda.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/veda-chat.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/views-bundle.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/proposal-extras.js?v=13.0.3" defer></script>
+<script src="js/features/mobile/installPrompt.js?v=13.0.3" defer></script>
+<script src="js/features/admin/reviewer-publications.js?v=13.0.3" defer></script>
+<script src="js/features/admin/reviewer-publications-modal.js?v=13.0.3" defer></script>
+<script src="js/features/staff/staff-publications.js?v=13.0.3" defer></script>
+<script src="js/features/staff/orcid-connection.js?v=13.0.3" defer></script>
+<script src="js/features/staff/orcid-config.js?v=13.0.3" defer></script>
+
+<!-- ── Procurement module (ЗОП, Pazardzhik Municipality Public Procurement) ── -->
+<script src="js/features/procurement/ProcurementRoutes.js?v=13.0.3" defer></script>
+<script src="js/features/procurement/ProcurementDashboard.js?v=13.0.3" defer></script>
+<script src="js/features/procurement/PositionView.js?v=13.0.3" defer></script>
+<script src="js/features/procurement/ComplianceChecker.js?v=13.0.3" defer></script>
+<script src="js/features/procurement/procurement-bundle.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/SavePointDialog.js?v=13.0.3" defer></script>
+<script src="js/features/proposal-wizard/shared/i18n.js?v=13.0.3" defer></script>
+<script src="js/features/proposal-wizard/shared/useAccessibility.js?v=13.0.3" defer></script>
+<script src="js/features/proposal-wizard/shared/useSavePoints.js?v=13.0.3" defer></script>
+
+<!-- ── Proposal Wizard v2.0 (v12.27.0) ────────────────────────────────── -->
+
+<!-- v12.30.0-perf: Load all 18 module files BEFORE the bundle -->
+
+<script src="js/features/proposal-wizard/config/budget-rules.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/config/document-requirements.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/api/types.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/api/proposalsApi.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/useWizardState.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/useAutosave.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/StatusBadge.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/AutosaveIndicator.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/ConfirmCloseDialog.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/ConflictResolutionDialog.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/InlineValidationSummary.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/StepIndicator.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/shared/DocumentCard.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step1BasicInfo/step1.schema.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step1BasicInfo/Step1BasicInfo.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step2Documents/step2.schema.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step2Documents/Step2Documents.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step3Budget/step3.schema.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/steps/Step3Budget/Step3Budget.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/WizardShell.js?v=13.0.3" defer></script>
+
+<script src="js/features/proposal-wizard/proposal-wizard-bundle.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/competitions.js?v=13.0.3" defer fetchpriority="high"></script>
+
+<script src="js/app-v13.01.1.js" defer fetchpriority="high"></script>
+
+<script src="js/doc-viewer.js?v=13.0.3" defer></script>
+
+
+
+<script src="js/i18n.js?v=13.0.3"></script>
+
+<script src="js/main.js?v=13.0.3" defer></script>
+
+
+
+<!-- ── GAS + PHP Pre-Warm (v12.27.9-loginperf) ─────────────────────────────
+
+     Fires lightweight requests to wake BOTH backends while scripts parse.
+
+     GAS: 'getversion' primes V8 isolate, saves ~2-3s on cold start.
+
+     PHP: 'ping' primes MySQL connection pool, saves ~1s.
+
+     Both requests are fire-and-forget (sendBeacon / Image). The inline
+
+     script executes during HTML parse (NOT deferred), so it runs BEFORE
+
+     core-bundle.js. It decodes the GAS URL from the encoded blob directly;
+
+     core-bundle.js sets ERP_CONFIG.GAS_URL later but the pre-warm fires
+
+     before any real data call needs it. -->
+
+<script>
+
+(function(){
+
+  // ── GAS pre-warm ────────────────────────────────────────────────
+
+  var u=(window.ERP_CONFIG&&window.ERP_CONFIG.GAS_URL)||'';
+
+  if(!u||!/^https?:\/\//.test(u)){
+
+    var _enc=window.ERP_CONFIG&&window.ERP_CONFIG.__ERP_GAS_ENCODED;
+
+    if(_enc){
+
+      var m=_enc.match(/^v\d+\.(.+)$/);
+
+      if(m){
+
+        var b64='';
+
+        for(var i=0;i<m[1].length;i++)b64+=String.fromCharCode(m[1].charCodeAt(i)-7);
+
+        try{u=decodeURIComponent(escape(atob(b64.replace(/-/g,'+').replace(/_/g,'/'))))}catch(_2){}
+
+      }
+
+    }
+
+  }
+
+  if(u&&/^https?:\/\//.test(u)){
+
+    var _gasWarmUrl = u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=getversion&_warmup=1&_t=' + Date.now();
+
+    try {
+
+      if (navigator.sendBeacon) navigator.sendBeacon(_gasWarmUrl, '');
+
+      else { var img = new Image(); img.src = _gasWarmUrl; }
+
+    } catch(_) {}
+
+  }
+
+
+
+  // ── PHP pre-warm (fire-and-forget) ─────────────────────────────
+
+  // PHP is the primary backend. Warming it in parallel with GAS means
+
+  // the first api() call finds a ready connection pool.
+
+  // Use the same _PHP_API_URL that hostinger-config.js will set.
+
+  var _phpPool = typeof window._PHP_API_POOL !== 'undefined' && window._PHP_API_POOL.length
+
+    ? window._PHP_API_POOL
+
+    : (typeof window._PHP_API_URL !== 'undefined' ? [window._PHP_API_URL] : []);
+
+  if (!_phpPool.length) {
+
+    // Fallback: use production PHP API URL directly (HTTPS only)
+
+    _phpPool = ['https://sr-ue-varna.com/database/api.php'];
+
+  }
+
+  for (var _pi = 0; _pi < _phpPool.length; _pi++) {
+
+    try {
+
+      var _phpUrl = _phpPool[_pi];
+
+      if (!_phpUrl || _phpUrl.indexOf('http') !== 0) continue;
+
+      if (navigator.sendBeacon) {
+
+        navigator.sendBeacon(_phpUrl, JSON.stringify({ action: 'ping', _warmup: 1 }));
+
+      } else {
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', _phpUrl, true);
+
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.send(JSON.stringify({ action: 'ping', _warmup: 1 }));
+
+      }
+
+    } catch(_) {}
+
+  }
+
+})();
+
+</script>
+
+
+
+<script>
+
+/* ── Service Worker registration (v12.27.9-loginperf) ────────────────────
+
+ * Registered immediately (inline, no 'load' wait) so caching starts
+
+ * during script load instead of after everything finishes. This saves
+
+ * ~2-3s on cold-start SW installation. sw.js lives at the root so its
+
+ * scope covers all pages.
+
+ * ─────────────────────────────────────────────────────────────────────── */
+
+if ('serviceWorker' in navigator) {
+
+  // v12.27.9: Use requestIdleCallback for non-critical SW registration so it
+
+  // never delays first paint. Falls back to setTimeout(0) in older browsers.
+
+  var _registerSW = function() {
+
+    // Skip SW registration on unsupported origins (file://, data:, null).
+
+    var _proto = (location && location.protocol) || '';
+
+    if (_proto !== 'http:' && _proto !== 'https:') {
+
+      return;
+
+    }
+
+    var _pageDir = (function(){
+
+      try { var u = new URL('./', document.baseURI || location.href); return u.pathname; }
+
+      catch(_) { return '/'; }
+
+    })();
+
+    var swSrc = _pageDir + 'sw.php?v=' + (window.__ERP_BUILD || '');
+
+    navigator.serviceWorker.register(swSrc, { scope: _pageDir })
+
+      .then(function (reg) {
+
+        reg.addEventListener('updatefound', function () {
+
+          var next = reg.installing;
+
+          if (!next) return;
+
+          next.addEventListener('statechange', function () {
+
+            if (next.state === 'installed' && navigator.serviceWorker.controller) {
+
+              next.postMessage({ type: 'SKIP_WAITING' });
+
+            }
+
+          });
+
+        });
+
+      })
+
+      .catch(function () { /* SW is progressive enhancement — silent fail */ });
+
+
+
+    var swRefreshing = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+
+      if (swRefreshing) return;
+
+      swRefreshing = true;
+
+      // v12.32.X: Reload only once, after a 100ms delay to let
+
+      // the service worker finish its install phase. Without the
+
+      // delay the reload can race with the SW's skipWaiting causing
+
+      // a flicker and potential re-registration loop.
+
+      setTimeout(function(){ window.location.reload(); }, 100);
+
+    });
+
+  };
+
+  // Register the service worker synchronously — no requestIdleCallback delay
+  // so the SW starts installing immediately on page load.
+  _registerSW();
+
+};
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
+

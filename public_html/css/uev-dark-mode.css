@@ -1,0 +1,98 @@
+/* ═══ UEV-ERP dark-mode base (E4 — genuine completion) ═══
+ *
+ * This file does NOT redefine component styles. The whole app is driven by
+ * CSS custom properties declared in css/uev.css (2519 var() usages). We only
+ * re-declare the SEMANTIC tokens (page bg, ink, surface, border, shadows…)
+ * so every component that reads them re-themes automatically. Brand accent
+ * tokens (--brand-*, --primary, --teal, --ok/--warn/--err/--info) are kept so
+ * the navy/teal identity survives on a dark canvas.
+ *
+ * Activation:
+ *   • Default: follows the OS via `@media (prefers-color-scheme: dark)`.
+ *   • Manual override: add `.theme-dark` / `.theme-light` on <html> (set by
+ *     the toggle in app.js via erp:theme). An explicit class wins over the
+ *     media query (declared after it, equal specificity, later wins).
+ *
+ * v12.49.52
+ */
+
+/* ── Shared dark token set ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0F1320;--bg-2:#161B2C;--white:#0F1320;--surface:#171C2E;--border:#2A3147;--border-2:#3A4159;
+    --ink:#E6E9F2;--ink-2:#C7CCDF;--ink-3:#9AA3BD;--ink-4:#7C849E;--ink-5:#5A627C;
+    --hover:var(--bg-2);
+    --red-dim:rgba(226,232,255,.06);--red-fog:rgba(226,232,255,.03);--red-border:rgba(226,232,255,.16);
+    --gold-glow:rgba(226,232,255,.14);
+    --info-bg:#1A2138;--info-border:#33406A;
+    --ok-bg:#13251C;--ok-border:#2C5B44;
+    --warn-bg:#2A2113;--warn-border:#6E5326;
+    --err-bg:#2A1616;--err-border:#6E3333;
+    --teal-bg:rgba(21,147,121,.10);--teal-border:rgba(21,147,121,.32);
+    --review-bg:rgba(133,133,189,.12);--review-border:rgba(133,133,189,.36);
+    --brand-gradient-soft:linear-gradient(180deg,rgba(35,56,116,.22) 0%,rgba(27,44,92,.22) 100%);
+    --shadow-xs:0 1px 3px rgba(0,0,0,.40);
+    --shadow-sm:0 2px 8px rgba(0,0,0,.46),0 1px 3px rgba(0,0,0,.34);
+    --shadow-md:0 4px 18px rgba(0,0,0,.52),0 2px 6px rgba(0,0,0,.38);
+    --shadow-lg:0 12px 40px rgba(0,0,0,.58),0 4px 12px rgba(0,0,0,.42);
+    --shadow-xl:0 20px 50px rgba(0,0,0,.62),0 8px 16px rgba(0,0,0,.46);
+    --shadow-glow:0 0 0 3px rgba(35,56,116,.34);
+  }
+}
+
+/* ── Explicit manual override: dark (wins over the media query above) ──── */
+html.theme-dark {
+  --bg:#0F1320;--bg-2:#161B2C;--white:#0F1320;--surface:#171C2E;--border:#2A3147;--border-2:#3A4159;
+  --ink:#E6E9F2;--ink-2:#C7CCDF;--ink-3:#9AA3BD;--ink-4:#7C849E;--ink-5:#5A627C;
+  --hover:var(--bg-2);
+  --red-dim:rgba(226,232,255,.06);--red-fog:rgba(226,232,255,.03);--red-border:rgba(226,232,255,.16);
+  --gold-glow:rgba(226,232,255,.14);
+  --info-bg:#1A2138;--info-border:#33406A;
+  --ok-bg:#13251C;--ok-border:#2C5B44;
+  --warn-bg:#2A2113;--warn-border:#6E5326;
+  --err-bg:#2A1616;--err-border:#6E3333;
+  --teal-bg:rgba(21,147,121,.10);--teal-border:rgba(21,147,121,.32);
+  --review-bg:rgba(133,133,189,.12);--review-border:rgba(133,133,189,.36);
+  --brand-gradient-soft:linear-gradient(180deg,rgba(35,56,116,.22) 0%,rgba(27,44,92,.22) 100%);
+  --shadow-xs:0 1px 3px rgba(0,0,0,.40);
+  --shadow-sm:0 2px 8px rgba(0,0,0,.46),0 1px 3px rgba(0,0,0,.34);
+  --shadow-md:0 4px 18px rgba(0,0,0,.52),0 2px 6px rgba(0,0,0,.38);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.58),0 4px 12px rgba(0,0,0,.42);
+  --shadow-xl:0 20px 50px rgba(0,0,0,.62),0 8px 16px rgba(0,0,0,.46);
+  --shadow-glow:0 0 0 3px rgba(35,56,116,.34);
+}
+
+/* ── Explicit manual override: light (force-off dark mode) ─────────────── */
+html.theme-light {
+  --bg:#f7f8fc;--bg-2:#ECEEF6;--white:#FFF;--surface:#FFFFFF;--border:#E2E5F0;--border-2:#C9D0EA;
+  --ink:#2e2545;--ink-2:#3A3358;--ink-3:#555;--ink-4:#666;--ink-5:#BBB;
+  --hover:var(--bg-2);
+  --red-dim:rgba(35,56,116,.07);--red-fog:rgba(35,56,116,.04);--red-border:rgba(35,56,116,.18);
+  --gold-glow:rgba(35,56,116,.16);
+  --info-bg:#EEF1FA;--info-border:#C9D0EA;
+  --ok-bg:#EDF7F2;--ok-border:#9FD4B8;
+  --warn-bg:#FFF8EC;--warn-border:#E8CC88;
+  --err-bg:#FEF2F2;--err-border:#E8AAAA;
+  --teal-bg:rgba(21,147,121,.06);--teal-border:rgba(21,147,121,.18);
+  --review-bg:rgba(133,133,189,.08);--review-border:rgba(133,133,189,.28);
+  --brand-gradient-soft:linear-gradient(180deg,rgba(35,56,116,.10) 0%,rgba(27,44,92,.10) 100%);
+  --shadow-xs:0 1px 3px rgba(35,56,116,.06);
+  --shadow-sm:0 2px 8px rgba(35,56,116,.08),0 1px 3px rgba(35,56,116,.04);
+  --shadow-md:0 4px 18px rgba(35,56,116,.10),0 2px 6px rgba(35,56,116,.05);
+  --shadow-lg:0 12px 40px rgba(35,56,116,.12),0 4px 12px rgba(35,56,116,.06);
+  --shadow-xl:0 20px 50px rgba(35,56,116,.14),0 8px 16px rgba(35,56,116,.06);
+  --shadow-glow:0 0 0 3px rgba(35,56,116,.18);
+}
+
+/* ── Affordances the variable swap alone can't fully cover ─────────────── */
+@media (prefers-color-scheme: dark) {
+  body { color:var(--ink); background:var(--bg); }
+  ::selection { background:rgba(133,133,189,.34); color:#fff; }
+}
+
+html.theme-dark body { color:var(--ink); background:var(--bg); }
+html.theme-dark ::selection { background:rgba(133,133,189,.34); color:#fff; }
+
+html.theme-dark *,
+html.theme-dark *::before,
+html.theme-dark *::after { scrollbar-color: var(--border-2) var(--bg-2); }

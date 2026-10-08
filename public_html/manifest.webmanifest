@@ -1,0 +1,30 @@
+{
+  "name": "ИУ – Варна · Научноизследователска дейност",
+  "short_name": "ИУ-Варна НИД",
+  "description": "Система за управление на научноизследователската дейност на Икономически университет – Варна. Конкурси, проектни предложения, рецензиране и договори.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#233874",
+  "lang": "bg",
+  "dir": "ltr",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/uev-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/uev-social-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
