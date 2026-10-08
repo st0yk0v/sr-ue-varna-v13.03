@@ -1,9 +1,9 @@
 <div align="center">
 
 <p>
-  <img src="assets/science-logo.png" alt="Научноизследователска дейност" height="100" align="middle"/>
+  <img src="public_html/assets/science-logo.png" alt="Научноизследователска дейност" height="100" align="middle"/>
   &nbsp;&nbsp;&nbsp;
-  <img src="assets/uev-social-logo.png" alt="Икономически университет – Варна" height="100" align="middle"/>
+  <img src="public_html/assets/uev-social-logo.png" alt="Икономически университет – Варна" height="100" align="middle"/>
 </p>
 
 # UEV-ERP v13.03
@@ -69,7 +69,7 @@ uev v 3.39x1/
     ├── .htaccess             # gzip, cache-control, security headers
     ├── robots.txt
     ├── LICENSE.txt           # EUPL-1.2
-    ├── assets/               # лога и изображения (science, UEV, YONKO-AI)
+    ├── assets/               # лога и изображения (science, UEV)
     ├── database/             # PHP/MySQL backend
     │   ├── api.php           # ~6600 реда — 90+ API handlers, batchapi, GZIP, timing
     │   ├── config.php        # PDO singleton, query cache, camelizeKeys, .env loader
